@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_top"><title>顧客データ管理 | 総研</title><style>:root{--ink:#233a35;--muted:#71807a;--green:#174c40;--line:#e3e9e4;--paper:#f6f8f5;--mint:#e8f1e9;--orange:#986638;--red:#b34b43;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);font-size:14px}*{box-sizing:border-box}body{margin:0;background:var(--paper)}button,input,select,textarea{font:inherit}button,a,input,select,summary{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}a{color:var(--green);text-decoration:none}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #93b9a7;outline-offset:3px}.app-shell{display:flex;min-height:100vh}.sidebar{width:244px;background:#153f35;color:#e7eee6;padding:32px 20px;flex-shrink:0;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:2}.brand{color:#fff;display:flex;gap:13px;align-items:center;font-size:23px;font-weight:650;margin:0 11px 42px}.brand-mark{font-family:Georgia,serif;font-size:35px;display:grid;place-content:center;width:43px;height:43px;border:1px solid #6a8a79;border-radius:10px;color:#e4e9ca}.brand-sub{display:block;font-size:8px;letter-spacing:1.6px;font-weight:500;margin-top:4px}.workspace-label{font-size:11px;color:#b3c3b9;margin:0 12px 17px;letter-spacing:1px}.workspace-label span{float:right;font-size:10px;background:#315c4c;padding:2px 7px;border-radius:4px;letter-spacing:0}.nav{width:100%;border:0;text-align:left;background:transparent;color:#bfd1c6;padding:15px 13px;margin-bottom:5px;border-radius:7px;font-size:13px;display:flex;align-items:center;gap:12px}.nav>span{font-size:19px;width:20px}.nav.active{background:#2d5948;color:#fff}.nav:hover{background:#254f40}.nav b{font-weight:500;font-size:11px;background:#d8e9c9;color:#294b39;border-radius:12px;padding:2px 7px;margin-left:auto}.sidebar-bottom{margin-top:auto;padding:22px 12px 0;font-size:11px;color:#c0cebd}.sidebar-bottom p{font-size:11px;line-height:1.9;color:#9caf9f;margin:18px 0 0}.connection-dot{width:6px;height:6px;background:#a4cfa7;border-radius:50%;display:inline-block;margin-right:6px}.main-wrap{margin-left:244px;width:calc(100% - 244px)}.topbar{height:78px;padding:0 42px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#fff;font-size:11px;color:var(--muted)}.topbar>div{display:flex;align-items:center;gap:20px}.slash{margin:0 13px;color:#bdc6bf}.avatar{width:31px;height:31px;border-radius:50%;background:#edf2e9;display:grid;place-items:center;font-family:Georgia,serif;color:#4c6b52}.mode-banner{font-size:11px;background:#edf3ec;color:#49674e;padding:9px 42px;border-bottom:1px solid #e0e9dc}.mode-banner.demo{background:#faf2e5;color:#886338}main{padding:36px 42px 50px;max-width:1680px;margin:auto;min-height:calc(100vh - 180px)}.page-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:28px}.eyebrow{font-size:9px;font-weight:600;letter-spacing:2px;color:#88958a}h1{font-size:28px;font-weight:600;letter-spacing:1px;margin:9px 0 10px}h2{font-size:20px;font-weight:600;margin:7px 0}h3{font-size:15px;font-weight:600;margin:0 0 9px}.subtext,.help{font-size:12px;color:var(--muted);line-height:1.8;margin:0}.heading-actions{display:flex;gap:9px}.button{border:1px solid #d6e1d7;border-radius:6px;padding:10px 16px;background:#fff;color:var(--ink);font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:9px;line-height:1.4}.button:hover{background:#eef3ed}.button.primary{background:var(--green);border-color:var(--green);color:white}.button.primary:hover{background:#246452}.button.text{border:0;background:transparent;color:var(--green);padding:6px 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:17px;margin-bottom:28px}.stat{background:#fff;border:1px solid var(--line);border-radius:9px;padding:20px 22px;position:relative}.stat .label{font-size:11px;color:#6f8074}.stat .value{font-family:Georgia,serif;font-size:36px;margin:12px 0 3px}.stat .value small{font-family:inherit;font-size:12px;color:#89968a;margin-left:8px}.stat .stat-note{font-size:10px;color:#93a08f}.stat .stat-icon{position:absolute;right:19px;top:20px;color:#91a58a;font-size:17px}.panel{background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}.panel-head{padding:23px 25px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px}.panel-head h3{margin:0}.panel-body{padding:25px}.toolbar{display:flex;justify-content:space-between;align-items:center;padding:19px 23px;gap:16px}.search{position:relative;flex:1;max-width:370px}.search input{padding-left:34px;background:#fbfcfa;font-size:12px}.search:before{content:'⌕';position:absolute;left:12px;top:9px;font-size:19px;color:#8c9d8f}.toolbar select{width:auto;min-width:130px;font-size:12px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;text-align:left}th{font-size:10px;font-weight:500;color:#798779;background:#f8faf6;padding:13px 23px;border-block:1px solid var(--line)}td{font-size:12px;padding:18px 23px;border-bottom:1px solid #eef1eb;vertical-align:middle}tr:last-child td{border-bottom:none}td .name{font-weight:600;font-size:13px;display:block;margin-bottom:5px}td .secondary{font-size:10px;color:#8b998a}.person-cell{display:flex;align-items:center;gap:12px}.person-initial{display:grid;place-items:center;width:35px;height:35px;background:#eef2e8;color:#657a58;border-radius:8px;font-size:12px;flex-shrink:0}.pill{border-radius:4px;padding:5px 8px;font-size:10px;display:inline-flex;align-items:center;gap:5px;background:#f1f3ed;color:#71806d}.pill.green{background:#eaf3e9;color:#557d48}.pill.amber{background:#fbf2df;color:#9b7940}.pill.red{background:#f9ece8;color:#ad6557}.pill.source{background:#f0f2ed;color:#788573}.table-foot{padding:17px 23px;font-size:10px;border-top:1px solid var(--line);color:#84917f;display:flex;justify-content:space-between;align-items:center}.empty{padding:60px 24px;text-align:center;line-height:2;color:#7b8c7a}.info-strip{margin-top:20px;display:flex;gap:10px;font-size:11px;color:#7c8a74;line-height:1.8;padding:15px 4px}.info-strip strong{font-weight:500;color:#5f7657}footer{border-top:1px solid var(--line);padding:20px 42px;font-size:10px;color:#9aa58f;display:flex;justify-content:space-between}.two-col{display:grid;grid-template-columns:1.35fr 1fr;gap:24px}.drop-zone{border:1px dashed #adbf9d;border-radius:9px;background:#f9fbf6;text-align:center;padding:42px 20px;display:block;cursor:pointer;margin-bottom:20px}.drop-icon{font-size:36px;color:#869d75;margin-bottom:12px}.drop-zone h3{margin:8px 0}.drop-zone input{margin:18px auto 0;max-width:100%;font-size:12px}.steps{padding:0;margin:0;list-style:none;counter-reset:step}.steps li{counter-increment:step;padding:0 0 25px 37px;position:relative;font-size:12px;line-height:1.9;color:#829079}.steps li:before{content:counter(step);position:absolute;left:0;top:1px;border-radius:50%;width:22px;height:22px;background:#eaf0e3;color:#60794e;text-align:center;font-size:10px}.steps li strong{display:block;color:#4a6042;font-weight:500;font-size:12px}.note{font-size:11px;background:#f6f8f2;border-radius:5px;line-height:1.9;color:#7c8b71;padding:13px 15px;margin:0 0 18px}.note.amber{background:#fcf4e5;color:#91743c}input:not([type=checkbox]):not([type=file]),textarea,select{width:100%;border:1px solid #dce4d7;border-radius:5px;padding:10px 11px;color:var(--ink);background:#fff;outline:none;min-height:39px}input:focus,select:focus,textarea:focus{border-color:#799c6a;box-shadow:0 0 0 3px #e5eedd}label{display:block;font-size:11px;color:#6c7e63;margin:0 0 17px}label input,label select,label textarea{margin-top:7px}textarea{resize:vertical;line-height:1.8}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.wide{grid-column:1/-1}.stop-box{display:flex;align-items:flex-start;gap:11px;padding:15px;border:1px solid #e6e9df;border-radius:6px;margin:18px 0}.stop-box input{margin:2px 0 0;accent-color:var(--green);width:16px;height:16px}.stop-box strong{font-size:12px;font-weight:500}.stop-box small{display:block;font-size:10px;line-height:1.8;margin-top:5px;color:#8b9780}dialog{border:1px solid var(--line);border-radius:12px;padding:0;width:min(700px,94vw);max-height:92vh;box-shadow:0 25px 90px #142d3333;color:var(--ink)}dialog::backdrop{background:#18362b66;backdrop-filter:blur(2px)}.dialog-head{display:flex;justify-content:space-between;padding:24px 28px;border-bottom:1px solid var(--line)}.dialog-body{padding:23px 28px;max-height:65vh;overflow:auto}.dialog-foot{padding:17px 28px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#fcfdfb}.icon-button{border:0;background:transparent;font-size:26px;color:#8d9c83;width:30px}.section-divider{height:1px;background:var(--line);margin:17px 0 24px}details{margin-bottom:15px}summary{font-size:11px;color:#6e8065;cursor:pointer;padding:9px 0}details .form-grid{padding-top:12px}.inline-error{padding:12px;background:#fcf0eb;color:#b05b4d;border-radius:5px;font-size:12px;line-height:1.7}#notice{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);max-width:90vw;z-index:10;background:#183f32;color:#fff;padding:14px 22px;box-shadow:0 5px 25px #24452b22;border-radius:7px;font-size:12px;line-height:1.8}#notice.error{background:#9b4f40}.loading{padding:60px;text-align:center;color:#8b9a81}.image-preview{width:100%;max-height:340px;object-fit:contain;background:#f4f5ef;border-radius:7px;margin:0 0 18px}.review-card{border:1px solid var(--line);border-radius:8px;padding:23px;margin-bottom:18px}.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}.compare-box{padding:17px;border:1px solid var(--line);border-radius:5px;background:#fafcf7;font-size:12px;line-height:1.9}.compare-box h3{font-size:11px;color:#859278}.compare-box strong{display:block;color:#3f5b35}.review-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.review-actions input{flex:1;min-width:180px}.review-actions select{max-width:280px}.preview-summary{display:flex;gap:20px;padding:15px 0;font-size:12px}.preview-summary b{font-family:Georgia,serif;font-size:24px;margin-right:5px}.file-meta{font-size:11px;line-height:1.9;color:#87957c}.pagination{display:flex;gap:10px;align-items:center}.mobile-quick{display:none}[hidden]{display:none!important}@media(min-width:1500px){.sidebar{width:270px;padding:35px 26px}.main-wrap{margin-left:270px;width:calc(100% - 270px)}main{padding:44px 54px}.topbar{padding:0 54px}}@media(max-width:1100px){.sidebar{width:205px;padding:28px 12px}.main-wrap{margin-left:205px;width:calc(100% - 205px)}main{padding:28px 24px}.topbar{padding:0 24px}.mode-banner{padding:9px 24px}.stats{gap:10px}.stat{padding:17px}.two-col{grid-template-columns:1fr}.topbar a{font-size:10px}td,th{padding-left:17px;padding-right:17px}.heading-actions .button{padding:10px 12px}}@media(max-width:720px){.app-shell{display:block}.sidebar{position:static;width:100%;padding:16px 17px 8px;display:block}.brand{margin:0 0 16px;font-size:20px}.brand-mark{width:32px;height:32px;font-size:26px}.brand-sub{font-size:7px}.workspace-label,.sidebar-bottom{display:none}nav{display:flex;overflow:auto;gap:4px}.nav{flex-shrink:0;width:auto;font-size:10px;padding:10px 9px;gap:5px;white-space:nowrap}.nav>span{font-size:15px;width:auto}.main-wrap{margin:0;width:100%}.topbar{height:52px;padding:0 17px;font-size:9px}.topbar>div{gap:8px}.topbar a{font-size:9px}.avatar{display:none}.mode-banner{padding:8px 17px;font-size:10px}main{padding:24px 17px;min-height:65vh}.page-heading{align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px}h1{font-size:24px}.heading-actions{width:100%}.heading-actions .button{flex:1;font-size:11px}.stats{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}.stat .value{font-size:30px}.stat .stat-note{font-size:9px}.toolbar{padding:13px;gap:8px;flex-wrap:wrap}.search{max-width:none;min-width:170px}.toolbar select{min-width:105px}.panel-head,.panel-body{padding:19px}.table-foot{padding:12px;font-size:9px}.review-grid{grid-template-columns:1fr;gap:10px}.review-card{padding:16px}.review-actions .button{flex:1}.review-actions select{max-width:none}.form-grid{gap:0 12px}.dialog-body{padding:20px 17px}.dialog-head{padding:20px 17px}.dialog-foot{padding:15px 17px}footer{padding:18px 17px;font-size:9px;gap:10px}.info-strip{font-size:10px}.drop-zone{padding:28px 13px}#notice{bottom:15px;width:max-content;max-width:92vw}.preview-summary{gap:14px;font-size:10px}}
+</style></head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#customers"><span class="brand-mark">S</span><span>総研<span class="brand-sub">CUSTOMER WORKSPACE</span></span></a>
+    <div class="workspace-label">顧客データ管理 <span>Ph1</span></div>
+    <nav aria-label="メインメニュー">
+      <button data-view="customers" class="nav active"><span>▦</span>顧客一覧</button>
+      <button data-view="import" class="nav"><span>↥</span>Sansan CSV取込</button>
+      <button data-view="image" class="nav"><span>▣</span>名刺から登録</button>
+      <button data-view="reviews" class="nav"><span>◈</span>重複確認 <b id="review-count">0</b></button>
+      <button data-view="history" class="nav"><span>◷</span>取込・変更履歴</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="connection-dot"></div><span id="side-connection">接続を確認中</span><p>取得経路・受信希望・停止を<br>分けて管理します。</p></div>
+  </aside>
+  <div class="main-wrap">
+    <header class="topbar"><span>総研マーケティング工場 <span class="slash">/</span> 顧客管理</span><div><a id="sheet-link" target="_blank" rel="noopener" hidden>スプレッドシートを開く ↗</a><span class="avatar">S</span></div></header>
+    <div id="mode-banner" class="mode-banner">読み込んでいます…</div>
+    <main id="main"><div class="loading">顧客データを読み込んでいます…</div></main>
+    <footer>顧客データ管理 · 初期版 <span>メール送信機能は含みません</span></footer>
+  </div>
+</div>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<dialog id="editor" aria-labelledby="editor-title"><form id="customer-form">
+  <header class="dialog-head"><div><span class="eyebrow">CUSTOMER PROFILE</span><h2 id="editor-title">顧客を登録</h2></div><button type="button" class="icon-button" data-close aria-label="閉じる">×</button></header>
+  <div class="dialog-body">
+    <p id="editor-hint" class="note"></p><input name="id" type="hidden"><input name="version" type="hidden"><input name="imageId" type="hidden">
+    <div class="form-grid">
+      <label>氏名<input name="name" autocomplete="name" maxlength="1000" placeholder="山田 太郎"></label><label>会社名<input name="company" autocomplete="organization" maxlength="1000" placeholder="株式会社〇〇"></label>
+      <label>部署<input name="department" maxlength="1000"></label><label>役職<input name="title" maxlength="1000"></label>
+      <label class="wide">メールアドレス<input name="email" type="email" maxlength="1000" autocomplete="email" placeholder="name@example.com"></label>
+      <label>電話番号<input name="phone" type="tel" maxlength="1000"></label><label>氏名カナ<input name="kana" maxlength="1000"></label>
+      <label>第2メール<input name="email2" type="email" maxlength="1000"></label><label>取得経路<select name="source"><option>手入力</option><option>名刺画像</option><option>Sansan</option><option>Web</option><option>その他</option></select></label>
+    </div>
+    <details><summary>Sansan識別情報</summary><div class="form-grid"><label>人物ID<input name="personId"></label><label>名刺ID<input name="cardId"></label><label>会社ID<input name="companyId"></label></div></details>
+    <div class="section-divider"></div><h3>受信希望と配信停止</h3><p class="help">顧客登録や名刺交換だけでは、購読同意にしません。</p>
+    <div class="form-grid"><label>購読同意<select name="consent"><option>未確認</option><option>確認手続中</option><option>同意済み</option><option>拒否</option></select></label><label>同意日時<input name="consentAt" type="datetime-local"></label><label>同意の確認方法<input name="consentMethod" placeholder="本人からの返信など" maxlength="1000"></label><label>同意の証拠・記録場所<input name="consentEvidence" placeholder="受付番号や保管先" maxlength="1000"></label></div>
+    <label class="stop-box"><input name="stopped" type="checkbox"><span><strong>配信を停止する</strong><small>停止は再取込・顧客編集でも維持されます。この初期版では解除できません。</small></span></label>
+    <label>停止理由<input name="stopReason" maxlength="1000"></label><label>メモ<textarea name="memo" rows="3" maxlength="5000"></textarea></label>
+    <div id="form-error" class="inline-error" role="alert" hidden></div>
+  </div>
+  <div class="dialog-foot"><button type="button" class="button" data-close>キャンセル</button><button type="submit" class="button primary" id="save-button">保存する</button></div>
+</form></dialog>
+<script>/* Shared by GAS and the local preview. No network or Google dependencies. */
+var CustomerCore = (function () {
+  'use strict';
+  const HEADERS = '会社名,会社名（英名）,会社名（カナ）,部署名,役職,氏名,氏名［姓］,氏名［名］,氏名（カナ）,氏名（カナ）［姓］,氏名（カナ）［名］,国,郵便番号(1),住所(1)［全て］,住所(1)［都道府県］,住所(1)［市区町村］,住所(1)［番地］,住所(1)［ビル名］,TEL-1(1),TEL-2(1),FAX(1),携帯電話(1),Email(1),URL(1),郵便番号(2),住所(2)［全て］,住所(2)［都道府県］,住所(2)［市区町村］,住所(2)［番地］,住所(2)［ビル名］,TEL-1(2),TEL-2(2),FAX(2),携帯電話(2),Email(2),URL(2),重要度区分,VP,CP,ファイル出力済み,タグ,登録日,名刺交換日,人事異動発令日,不達フラグ(住所),不達フラグ(TEL),不達フラグ(FAX),不達フラグ(メール),メモ,自動追記メモ,名刺所有者ユーザID,名刺所有者名,名刺所有者所属部署名,人物ID,名刺ID,会社ID,データ化状況,法人番号,SOC (Sansan Organization Code),（空欄）'.split(',');
+  const TABLES = ['customers', 'reviews', 'imports', 'raw', 'events', 'images', 'stops'];
+  const TEXT_FIELDS = ['name','company','department','title','email','email2','phone','kana','memo','personId','cardId','companyId','consentAt','consentMethod','consentEvidence','stopReason'];
+  const copy = x => JSON.parse(JSON.stringify(x));
+  const norm = s => String(s || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+  const mail = s => String(s || '').trim().toLowerCase(); // Used for conservative matching, never rewrites delivery addresses.
+  const emailValid = s => !s || /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(s);
+  function empty() { return Object.fromEntries(TABLES.map(k => [k, []])); }
+  function parseCsv(input) {
+    const text = String(input).replace(/^\uFEFF/, '');
+    const rows = []; let row = [], field = '', quoted = false, after = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+        else if (c === '"') { quoted = false; after = true; }
+        else field += c;
+      } else if (c === '"' && !field && !after) quoted = true;
+      else if (c === ',') { row.push(field); field = ''; after = false; }
+      else if (c === '\r' || c === '\n') {
+        row.push(field); rows.push(row); row = []; field = ''; after = false;
+        if (c === '\r' && text[i+1] === '\n') i++;
+      } else {
+        if (after || c === '"') throw new Error('CSVの引用符が不正です。取込は行っていません。');
+        field += c;
+      }
+    }
+    if (quoted) throw new Error('CSVの引用符が閉じられていません。');
+    if (field || row.length || after) { row.push(field); rows.push(row); }
+    if (!rows.length) throw new Error('CSVが空です。');
+    return rows;
+  }
+  function csvPlan(text, state) {
+    if (String(text).includes('\uFFFD')) throw new Error('読み取れない文字があります。文字コードを選び直してください。');
+    const rows = parseCsv(text), headers = rows.shift();
+    if (headers.length !== HEADERS.length || headers.some((h,i) => h !== HEADERS[i])) throw new Error('見本のSansan形式（60列）と列名・順番が異なります。原本を変更せず、列対応を確認してください。');
+    let blank = 0;
+    const items = [];
+    rows.forEach((values,i) => {
+      if (values.every(v => !v.trim())) { blank++; return; }
+      if (values.length !== headers.length) throw new Error('CSVレコード ' + (i+2) + ' の列数が異なります。');
+      if (JSON.stringify(values).length > 40000) throw new Error('1行が大きすぎます。レコード ' + (i+2));
+      const get = key => values[headers.indexOf(key)] || '';
+      const incoming = {
+        name:get('氏名') || [get('氏名［姓］'),get('氏名［名］')].filter(Boolean).join(' '),
+        company:get('会社名'),department:get('部署名'),title:get('役職'),kana:get('氏名（カナ）'),
+        email:get('Email(1)').trim(),email2:get('Email(2)').trim(),phone:get('TEL-1(1)') || get('携帯電話(1)'),
+        personId:get('人物ID'),cardId:get('名刺ID'),companyId:get('会社ID'),memo:get('メモ'),
+        source:'Sansan',consent:'未確認',stopped:false
+      };
+      items.push({record:i+2,values,incoming});
+    });
+    if (!items.length) throw new Error('登録できる内容のある行がありません。');
+    if (items.length > 200) throw new Error('初期版は1回200件までです。原本を保管したうえで分割出力してください。');
+    const pool = state.customers.concat(items.map(x => Object.assign({id:'CSV-'+x.record},x.incoming)));
+    items.forEach(x => { x.matches = matches(x.incoming,pool,'CSV-'+x.record); });
+    return {headers,items,total:rows.length,blank,candidates:items.filter(x=>x.matches.length).length};
+  }
+  function matches(c, customers, except) {
+    return customers.filter(x => x.id !== except).flatMap(x => {
+      const why = [];
+      if (c.personId && c.personId === x.personId && c.source === x.source) why.push('人物IDが一致');
+      if (c.cardId && c.cardId === x.cardId && c.source === x.source) why.push('名刺IDが一致');
+      const emails = [x.email,x.email2].map(mail).filter(Boolean);
+      if ([c.email,c.email2].map(mail).filter(Boolean).some(e => emails.includes(e))) why.push('メールが一致');
+      if (c.name && c.company && norm(c.name) === norm(x.name) && norm(c.company) === norm(x.company)) why.push('氏名と会社が一致');
+      return why.length ? [{id:x.id,name:x.name,company:x.company,email:x.email,reasons:why}] : [];
+    });
+  }
+  function validate(c) {
+    if (![c.name,c.company,c.email].some(v => String(v || '').trim())) throw new Error('氏名・会社名・メールのいずれかを入力してください。');
+    TEXT_FIELDS.forEach(k => { if (String(c[k] || '').length > (k === 'memo' ? 5000 : 1000)) throw new Error('入力が長すぎます：'+k); });
+    if (!emailValid(c.email) || !emailValid(c.email2)) throw new Error('メールの形式を確認してください。');
+    if (!['未確認','確認手続中','同意済み','拒否'].includes(c.consent)) throw new Error('同意状態が不正です。');
+    if (!['Sansan','手入力','名刺画像','Web','その他'].includes(c.source)) throw new Error('取得経路が不正です。');
+    if (c.consent === '同意済み' && (!c.email || !c.consentAt || !c.consentMethod || !c.consentEvidence || !Number.isFinite(Date.parse(c.consentAt)))) throw new Error('同意済みには、メール・有効な同意日時・確認方法・証拠の記録が必要です。');
+  }
+  function event(s,ctx,type,data) { s.events.push({id:ctx.id('EV'),at:ctx.now,actor:ctx.actor,type,data}); }
+  function stop(s,c,ctx,reason) {
+    if (!s.stops.some(x => x.customerId === c.id && x.email === mail(c.email))) s.stops.push({id:ctx.id('STOP'),customerId:c.id,email:mail(c.email),at:ctx.now,reason:reason || '画面で停止',actor:ctx.actor});
+    c.stopped = true; c.stopAt = c.stopAt || ctx.now;
+  }
+  function make(c,ctx) { return Object.assign({id:ctx.id('C'),version:1,createdAt:ctx.now,updatedAt:ctx.now,consent:'未確認',stopped:false,source:'手入力'},c); }
+  function save(state,input,ctx) {
+    const s = copy(state), old = s.customers.find(c => c.id === input.id);
+    if (input.id && !old) throw new Error('顧客が見つかりません。一覧を更新してください。');
+    if (old && old.version !== Number(input.version)) throw new Error('別の操作で更新されています。一覧を更新してやり直してください。');
+    const c = old ? copy(old) : make({},ctx);
+    TEXT_FIELDS.forEach(k => { c[k] = String(input[k] || '').trim(); });
+    c.source = old ? old.source : (input.source || '手入力');
+    c.consent = input.consent || '未確認';
+    c.stopped = Boolean(old && old.stopped) || input.stopped === true;
+    if (old && old.stopped && input.stopped !== true) throw new Error('この初期版では停止を解除できません。');
+    if (old && mail(old.email) !== mail(c.email)) {
+      c.consent = '未確認'; c.consentAt = ''; c.consentMethod = ''; c.consentEvidence = '';
+    }
+    if (c.consent === '拒否') c.stopped = true;
+    if (input.imageId) {
+      if (!s.images.some(x => x.id === input.imageId)) throw new Error('名刺画像の保存記録が見つかりません。');
+      c.imageId = input.imageId;
+    }
+    validate(c);
+    const candidates = matches(c,s.customers,c.id);
+    if (!old && candidates.length) {
+      // A stop request must take effect even while the person's identity is unresolved.
+      if (c.stopped) stop(s,c,ctx,c.stopReason || '重複確認中の停止申出');
+      const r = {id:ctx.id('REV'),incoming:c,matches:candidates,status:'確認待ち',at:ctx.now,source:c.source};
+      s.reviews.push(r); event(s,ctx,'重複候補の受付',{reviewId:r.id,incoming:c});
+      return {state:s,message:'重複候補が見つかりました。「重複確認」で判断してください。',reviewId:r.id};
+    }
+    c.version = old ? old.version+1 : 1; c.updatedAt = ctx.now;
+    if (c.stopped) stop(s,c,ctx,c.stopReason);
+    if (old) s.customers[s.customers.findIndex(x=>x.id===c.id)] = c;
+    else s.customers.push(c);
+    event(s,ctx,old?'顧客編集':'顧客登録',{before:old || null,after:c});
+    return {state:s,message:'顧客情報を保存しました。',id:c.id};
+  }
+  function importCsv(state,text,meta,ctx) {
+    const s = copy(state);
+    if (s.imports.some(x=>x.hash===meta.hash)) throw new Error('同じ内容のCSVは取込済みです。取込履歴を確認してください。');
+    const plan = csvPlan(text,s), batch = Object.assign({id:ctx.id('IMP'),at:ctx.now,actor:ctx.actor,status:'完了',total:plan.total,blank:plan.blank,count:plan.items.length,created:0,pending:0,headers:plan.headers},meta);
+    plan.items.forEach(item => {
+      const c = make(item.incoming,ctx);
+      s.raw.push({id:ctx.id('RAW'),batchId:batch.id,record:item.record,values:item.values});
+      c.batchId = batch.id; c.record = item.record;
+      // Match the complete file as well as existing customers. Future rows also block auto registration.
+      if (item.matches.length || !emailValid(c.email) || !emailValid(c.email2)) {
+        s.reviews.push({id:ctx.id('REV'),incoming:c,matches:item.matches,status:'確認待ち',at:ctx.now,source:'Sansan',reason:!emailValid(c.email)||!emailValid(c.email2)?'メール形式の確認が必要':''});
+        batch.pending++;
+      } else { s.customers.push(c); batch.created++; }
+    });
+    s.imports.push(batch); event(s,ctx,'CSV取込',{batchId:batch.id,created:batch.created,pending:batch.pending});
+    return {state:s,message:batch.created+'件を登録、'+batch.pending+'件を確認待ちにしました。',id:batch.id};
+  }
+  function resolve(state,input,ctx) {
+    const s = copy(state), r = s.reviews.find(x=>x.id===input.reviewId);
+    if (!r || r.status !== '確認待ち') throw new Error('この候補は処理済みです。一覧を更新してください。');
+    if (!String(input.reason || '').trim()) throw new Error('判断の理由を入力してください。');
+    let target;
+    if (input.mode === 'existing') {
+      target = s.customers.find(x=>x.id===input.customerId);
+      if (!target) throw new Error('関連付け先の顧客を選んでください。');
+      if (!matches(r.incoming,[target]).length) throw new Error('関連付け先を確認してください。一致する根拠がありません。');
+      // Linking a contact never overwrites an existing name, address, consent or stop state.
+      if (status(s,r.incoming).stopped) stop(s,target,ctx,'関連付け元の停止を維持');
+      target.version++; target.updatedAt = ctx.now;
+    } else if (input.mode === 'new') {
+      target = make(r.incoming,ctx);
+      validate(target);
+      target.id = ctx.id('C');
+      if (status(s,target).stopped) stop(s,target,ctx,'メールアドレスの既存停止');
+      s.customers.push(target);
+    } else throw new Error('同じ人または別人を選んでください。');
+    r.status = input.mode === 'existing' ? '既存顧客へ関連付け' : '別人として登録';
+    r.customerId = target.id; r.reason = input.reason.trim(); r.resolvedAt = ctx.now; r.resolvedBy = ctx.actor;
+    event(s,ctx,'重複判断',{reviewId:r.id,customerId:target.id,mode:input.mode,reason:r.reason,incoming:r.incoming});
+    return {state:s,message:'判断を保存しました。元データと既存の同意・停止は保持しています。'};
+  }
+  function status(s,c) {
+    const emails = [c.email,c.email2].map(mail).filter(Boolean);
+    const stopped = c.stopped || s.stops.some(x=>x.customerId===c.id || (x.email && emails.includes(x.email)));
+    const duplicate = matches(c,s.customers,c.id).some(m=>m.reasons.includes('メールが一致')) || s.reviews.some(r=>r.status==='確認待ち' && (matches(c,[r.incoming]).length || r.matches.some(m=>m.id===c.id)));
+    const reasons = [];
+    if (stopped) reasons.push('配信停止');
+    if (duplicate) reasons.push('重複・共有宛先の確認待ち');
+    if (!c.email || !emailValid(c.email)) reasons.push('宛先の確認待ち');
+    if (c.email2) reasons.push('配信用宛先の選択待ち');
+    if (c.consent !== '同意済み' || !c.consentAt || !c.consentMethod || !c.consentEvidence) reasons.push('受信希望の確認待ち');
+    return {stopped,duplicate,reasons,label:stopped?'配信停止':reasons.length?'確認待ち':'同意記録あり'};
+  }
+  function suggest(text) {
+    return {email:(String(text).match(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i)||[''])[0],phone:(String(text).match(/(?:\+81[\s-]?)?0?\d{1,4}[-ー\s]\d{1,4}[-ー\s]\d{3,4}/)||[''])[0]};
+  }
+  return {HEADERS,TABLES,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy};
+})();
+if (typeof module !== 'undefined') module.exports = CustomerCore;
+</script><script>'use strict';
+const $ = (q,root=document) => root.querySelector(q);
+const esc = x => String(x == null ? '' : x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let data = CustomerCore.empty(), view = 'customers', query = '', filter = 'all', page = 0, csvFile = null, imageFile = null, imageUrl = '', busy = false;
+const operationIds = new Map();
+const uuid = () => crypto.randomUUID();
+const date = x => x ? new Date(x).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+function tell(message,error=false) { const n=$('#notice');n.textContent=message;n.className=error?'error':'';n.hidden=false;clearTimeout(tell.timer);tell.timer=setTimeout(()=>n.hidden=true,error?15000:6500); }
+async function api(method,payload) {
+  const mutation = method !== 'getAppData';
+  const key = method + JSON.stringify(payload || {});
+  if(mutation){if(!operationIds.has(key))operationIds.set(key,uuid());payload=Object.assign({},payload,{operationId:operationIds.get(key)});}
+  let result;
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    result = await new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message || String(e))))[method](payload));
+  } else {
+    const r=await fetch('/api/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload || {})});
+    result=await r.json(); if(!r.ok)throw new Error(result.error || '通信に失敗しました。');
+  }
+  if(mutation)operationIds.delete(key);
+  return result;
+}
+function connection() {
+  $('#mode-banner').className='mode-banner'+(data.mode==='gas'?'':' demo');
+  $('#mode-banner').textContent=data.mode==='gas'?'● スプレッドシート連携中 · '+data.actor:'画面確認用デモ · スプレッドシート未接続 · 入力内容はこのローカルサーバーの終了で消えます';
+  $('#side-connection').textContent=data.mode==='gas'?'Googleスプレッドシート連携':'ローカルデモ';
+  const link=$('#sheet-link');link.hidden=!data.spreadsheetUrl;
+  if(data.spreadsheetUrl && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(data.spreadsheetUrl))link.href=data.spreadsheetUrl;
+  $('#review-count').textContent=data.reviews.filter(x=>x.status==='確認待ち').length;
+}
+async function refresh() { data=await api('getAppData');connection();render(); }
+function heading(title,description,actions='') { return `<div class="page-heading"><div><div class="eyebrow">CUSTOMER WORKSPACE</div><h1>${title}</h1><p class="subtext">${description}</p></div><div class="heading-actions">${actions}</div></div>`; }
+function pill(label,tone='') {return `<span class="pill ${tone}">${esc(label)}</span>`;}
+function status(c) {return CustomerCore.status(data,c);}
+function customerRows() {
+  let list=data.customers.filter(c=>[c.name,c.company,c.email,c.email2,c.kana,c.id].some(v=>String(v||'').toLowerCase().includes(query.toLowerCase())));
+  list=list.filter(c=>filter==='all'||filter==='stopped'&&status(c).stopped||filter==='pending'&&!status(c).stopped&&status(c).reasons.length||filter==='agreed'&&!status(c).reasons.length);
+  list.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+  const pages=Math.max(1,Math.ceil(list.length/20));page=Math.min(page,pages-1);
+  $('#customer-rows').innerHTML=list.slice(page*20,page*20+20).map(c=>{
+    const st=status(c);
+    return `<tr><td><div class="person-cell"><span class="person-initial">${esc((c.name||c.company||'?').slice(0,1))}</span><div><span class="name">${esc(c.name||'氏名未入力')}</span><span class="secondary">${esc(c.id.slice(0,12))}</span></div></div></td><td>${esc(c.company||'—')}<div class="secondary">${esc(c.department||'')}</div></td><td>${esc(c.email||'未登録')}</td><td>${pill(c.source,'source')}</td><td title="${esc(st.reasons.join(' / '))}">${pill(st.label,st.stopped?'red':st.reasons.length?'amber':'green')}</td><td><button class="button text" data-edit="${esc(c.id)}">編集 ↗</button></td></tr>`;
+  }).join('')||'<tr><td colspan="6"><div class="empty">条件に合う顧客がいません。<br>「顧客を登録」または「CSVを取り込む」から追加できます。</div></td></tr>';
+  $('#table-total').textContent=list.length+' 件中 '+(list.length?page*20+1:0)+'–'+Math.min(page*20+20,list.length)+' 件を表示';
+  $('#page-label').textContent=(page+1)+' / '+pages;$('#prev-page').disabled=page===0;$('#next-page').disabled=page>=pages-1;
+}
+function render() {
+  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  const main=$('#main');
+  if(view==='customers') {
+    const counts=[data.customers.length,data.customers.filter(c=>!status(c).reasons.length).length,data.reviews.filter(r=>r.status==='確認待ち').length,data.customers.filter(c=>status(c).stopped).length];
+    main.innerHTML=heading('顧客一覧','名刺や登録情報を、一人ひとりの顧客につなげる。','<button class="button" data-view="import">↥ CSVを取り込む</button><button class="button primary" data-new>＋ 顧客を登録</button>')+
+    `<section class="stats" aria-label="登録状況">${['登録顧客','同意記録あり','重複確認待ち','配信停止'].map((t,i)=>`<div class="stat"><span class="label">${t}</span><span class="stat-icon">${['▦','✓','◈','⊖'][i]}</span><div class="value">${counts[i]}<small>${i===2?'件':'人'}</small></div><span class="stat-note">${['登録済みの顧客','配信時には別途確認が必要','判断を待っている登録','再取込後も停止を維持'][i]}</span></div>`).join('')}</section>
+    <section class="panel"><div class="panel-head"><h3>すべての顧客</h3><button class="button text" data-refresh>↻ 最新の情報に更新</button></div><div class="toolbar"><div class="search"><input id="search" aria-label="顧客を検索" placeholder="氏名・会社・メールで検索" value="${esc(query)}"></div><select id="status-filter" aria-label="状態で絞り込む"><option value="all">すべての状態</option><option value="pending">確認待ち</option><option value="agreed">同意記録あり</option><option value="stopped">配信停止</option></select></div><div class="table-wrap"><table><thead><tr><th>氏名 / 顧客ID</th><th>会社 / 部署</th><th>メールアドレス</th><th>取得経路</th><th>管理状態</th><th></th></tr></thead><tbody id="customer-rows"></tbody></table></div><div class="table-foot"><span id="table-total"></span><div class="pagination"><button class="button" id="prev-page" aria-label="前のページ">‹</button><span id="page-label"></span><button class="button" id="next-page" aria-label="次のページ">›</button></div></div></section><div class="info-strip">ⓘ <span><strong>登録と購読同意は別々に管理します。</strong> 名刺交換・CSV取込だけでは「同意済み」になりません。</span></div>`;
+    $('#status-filter').value=filter;customerRows();
+  } else if(view==='import') {
+    main.innerHTML=heading('Sansan CSV取込','原本を残し、重複候補を確認してから登録します。')+`<div class="two-col"><section class="panel"><div class="panel-head"><h3>CSVファイルを選択</h3>${pill('Sansan形式 · 60列','source')}</div><div class="panel-body"><label class="drop-zone"><div class="drop-icon">↥</div><h3>Sansanから出力したCSV</h3><p class="help">初期版：内容のある行200件まで・2MBまで</p><input id="csv-input" type="file" accept=".csv,text/csv" aria-label="Sansan CSVファイル"></label><label>文字コード<select id="encoding"><option value="UTF-8">UTF-8</option><option value="Shift_JIS">Shift_JIS（文字が読めない場合）</option></select></label><div id="csv-preview"><p class="note">列名と順番が見本と異なる場合は、登録を止めて確認します。</p></div></div></section><section class="panel"><div class="panel-head"><h3>取込の流れ</h3></div><div class="panel-body"><ol class="steps"><li><strong>ファイルを選んで内容を確認</strong>件数・空行・重複候補を表示します。</li><li><strong>原CSVを保管して登録</strong>元の60列と原本を保持。重複候補は確認待ちにします。</li><li><strong>同じ人かを判断</strong>「重複確認」で既存顧客への関連付け、または別人の登録を選びます。</li></ol><p class="note amber">停止中の顧客は、CSVを入れ直しても停止を維持します。購読同意は自動で付けません。</p></div></section></div>`;
+    csvFile=null;
+  } else if(view==='image') {
+    main.innerHTML=heading('名刺から登録','スマホで撮影。読み取った内容を確認して、顧客として登録します。')+`<div class="two-col"><section class="panel"><div class="panel-head"><h3>名刺を撮影・選択</h3>${pill('JPEG / PNG','source')}</div><div class="panel-body"><label class="drop-zone"><div class="drop-icon">▣</div><h3>名刺の画像を選ぶ</h3><p class="help">明るい場所で、名刺全体をまっすぐ撮影してください。</p><input id="image-input" type="file" accept="image/jpeg,image/png" capture="environment" aria-label="名刺画像を撮影または選択"></label><p class="help">保存済み写真を選ぶ場合は、下の「写真から選ぶ」を使えます。</p><label>写真から選ぶ<input id="photo-input" type="file" accept="image/jpeg,image/png" aria-label="写真から選ぶ"></label><div id="image-preview"></div><button class="button primary" id="read-image" disabled>画像を保存して文字を読み取る</button><p class="file-meta">5MBまで。原画像と読取結果を設定したGoogle Driveフォルダに保存します。</p></div></section><section class="panel"><div class="panel-head"><h3>確認してから登録</h3></div><div class="panel-body"><ol class="steps"><li><strong>Googleで文字を読み取る</strong>画像をGoogleドキュメントへ変換して読み取ります。初回にDrive APIの設定が必要です。</li><li><strong>読み間違いを確認</strong>メール・電話は入力候補を表示。氏名・会社・部署を確認して入力します。</li><li><strong>重複を確認して保存</strong>既存のCSV・手入力データとも照合します。画像から購読同意は付けません。</li></ol><div id="ocr-result"></div></div></section></div>`;
+    imageFile=null;
+  } else if(view==='reviews') {
+    const pending=data.reviews.filter(r=>r.status==='確認待ち');
+    main.innerHTML=heading('重複確認','同じ人かもしれない登録を、人の判断で確認します。')+`<p class="note">同じ人なら既存顧客へ取得履歴を追加します。氏名・メール・同意・停止を自動で上書きしません。候補が同じCSV内にある場合は、まず片方を確認して登録してから、もう片方を関連付けられます。</p>`+(pending.length?pending.map(r=>{
+      const current=CustomerCore.matches(r.incoming,data.customers);
+      return `<article class="review-card" data-review="${esc(r.id)}"><div>${pill('確認待ち','amber')} <span class="file-meta">${esc(r.source)} · ${date(r.at)}</span></div><div class="review-grid"><div class="compare-box"><h3>新しく入ってきた情報</h3><strong>${esc(r.incoming.name||'氏名未入力')}</strong>${esc(r.incoming.company)}<br>${esc(r.incoming.email||'メール未入力')}<br><span class="secondary">${esc(r.reason||'')}</span></div><div class="compare-box"><h3>既存顧客の候補</h3>${current.length?current.map(c=>`<strong>${esc(c.name)} / ${esc(c.company)}</strong>${esc(c.email)}<br><span class="file-meta">${esc(c.reasons.join('・'))}</span>`).join('<hr>'):'現在の一覧には一致候補がありません。同じCSV内の別行、または形式不備を確認してください。'}</div></div><label>判断の理由<input class="review-reason" placeholder="名刺の内容を確認して同じ人と判断、など" maxlength="1000"></label><div class="review-actions"><select class="review-target" aria-label="関連付け先の顧客"><option value="">関連付け先を選択</option>${current.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} / ${esc(c.company)}</option>`).join('')}</select><button class="button primary" data-resolve="existing" ${current.length?'':'disabled'}>同じ人・関連付ける</button><button class="button" data-resolve="new">別人・新しく登録</button></div><p class="file-meta">${esc(r.id)}</p></article>`;
+    }).join(''):'<div class="panel empty">確認待ちの候補はありません。</div>');
+  } else {
+    main.innerHTML=heading('取込・変更履歴','いつ、誰が、どの情報を登録・変更したかを確認できます。')+`<section class="panel"><div class="panel-head"><h3>CSV取込履歴</h3></div><div class="table-wrap"><table><thead><tr><th>ファイル</th><th>日時</th><th>新規登録</th><th>確認待ち</th><th>空行</th><th>原本</th></tr></thead><tbody>${data.imports.slice().reverse().map(x=>`<tr><td>${esc(x.name)}</td><td>${date(x.at)}</td><td>${x.created}件</td><td>${x.pending}件</td><td>${x.blank}件</td><td>${x.fileId?`<a href="https://drive.google.com/file/d/${encodeURIComponent(x.fileId)}/view" target="_blank" rel="noopener">開く ↗</a>`:'デモ内のみ'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">取込履歴はありません。</td></tr>'}</tbody></table></div></section><div style="height:24px"></div><section class="panel"><div class="panel-head"><h3>最近の変更（最大100件）</h3></div><div class="table-wrap"><table><thead><tr><th>日時</th><th>操作</th><th>担当者</th><th>記録ID</th></tr></thead><tbody>${data.events.map(x=>`<tr><td>${date(x.at)}</td><td>${esc(x.type)}</td><td>${esc(x.actor)}</td><td class="secondary">${esc(x.id.slice(0,18))}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">変更履歴はありません。</td></tr>'}</tbody></table></div></section>`;
+  }
+}
+function openEditor(c={}) {
+  const form=$('#customer-form');form.reset();$('#form-error').hidden=true;
+  Array.from(form.elements).forEach(el=>{if(el.name && el.type!=='checkbox')el.value=c[el.name] || '';});
+  form.elements.source.value=c.source || '手入力';form.elements.consent.value=c.consent || '未確認';form.elements.source.disabled=Boolean(c.id);
+  form.elements.version.value=c.version || '';
+  const stopped=c.id?status(c).stopped:Boolean(c.stopped);form.elements.stopped.checked=stopped;form.elements.stopped.disabled=stopped;
+  if(c.consentAt){const d=new Date(c.consentAt);if(!isNaN(d))form.elements.consentAt.value=new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+  $('#editor-title').textContent=c.id?'顧客情報を編集':'顧客を登録';
+  $('#editor-hint').textContent=c.id?'顧客IDは維持されます。メール変更時は、同意を未確認へ戻します。':c.imageId?'名刺画像の読取候補です。氏名・会社・メールを確認して保存してください。':'氏名・会社名・メールのいずれかを入力してください。保存時に重複を確認します。';
+  $('#editor').showModal();
+}
+async function filePayload(file) {
+  const buf=await file.arrayBuffer();let binary='';const bytes=new Uint8Array(buf);
+  for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
+  return {name:file.name,mime:file.type,base64:btoa(binary)};
+}
+async function csvPreview() {
+  const target=$('#csv-preview');if(!csvFile)return;
+  try {
+    const text=new TextDecoder($('#encoding').value==='Shift_JIS'?'shift-jis':'utf-8',{fatal:true}).decode(await csvFile.arrayBuffer());
+    const p=CustomerCore.csvPlan(text,data);
+    target.innerHTML=`<h3>${esc(csvFile.name)}</h3><div class="preview-summary"><span><b>${p.items.length}</b>件</span><span><b>${p.candidates}</b>重複候補</span><span><b>${p.blank}</b>空行</span></div><div class="table-wrap"><table><thead><tr><th>氏名</th><th>会社</th><th>確認</th></tr></thead><tbody>${p.items.slice(0,8).map(x=>`<tr><td>${esc(x.incoming.name||'未入力')}</td><td>${esc(x.incoming.company)}</td><td>${pill(x.matches.length?'重複候補':'新規候補',x.matches.length?'amber':'green')}</td></tr>`).join('')}</tbody></table></div><p class="file-meta">先頭8件を表示。登録時に最新データで再照合します。</p><label class="stop-box"><input id="confirm-import" type="checkbox"><span>内容と保存先を確認しました。原CSVを保管して登録します。</span></label><button class="button primary" id="commit-import">原本を保存して取り込む</button>`;
+  } catch(e){target.innerHTML=`<div class="inline-error">${esc(e.message)}</div>`;}
+}
+async function act(task) {
+  if(busy)return;busy=true;document.body.setAttribute('aria-busy','true');
+  const buttons=Array.from(document.querySelectorAll('button:not(:disabled)'));buttons.forEach(b=>b.disabled=true);
+  try{await task();}catch(e){tell(e.message,true);}finally{busy=false;buttons.forEach(b=>{if(b.isConnected)b.disabled=false;});document.body.removeAttribute('aria-busy');}
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||busy)return;
+  if(b.dataset.view){view=b.dataset.view;render();}
+  if(b.hasAttribute('data-new'))openEditor();
+  if(b.dataset.edit)openEditor(data.customers.find(c=>c.id===b.dataset.edit));
+  if(b.hasAttribute('data-close'))$('#editor').close();
+  if(b.hasAttribute('data-refresh'))act(refresh);
+  if(b.id==='prev-page'||b.id==='next-page'){page+=b.id==='next-page'?1:-1;customerRows();}
+  if(b.id==='commit-import')act(async()=>{
+    if(!$('#confirm-import').checked)throw new Error('内容と原本の保存を確認し、チェックしてください。');
+    const input=await filePayload(csvFile);input.mime='text/csv';input.encoding=$('#encoding').value;
+    data=await api('importSansan',input);tell(data.message);view='history';connection();render();
+  });
+  if(b.dataset.resolve)act(async()=>{
+    const card=b.closest('[data-review]');
+    data=await api('resolveDuplicate',{reviewId:card.dataset.review,mode:b.dataset.resolve,customerId:$('.review-target',card).value,reason:$('.review-reason',card).value});
+    tell(data.message);connection();render();
+  });
+  if(b.id==='read-image')act(async()=>{
+    const result=await api('readBusinessCard',await filePayload(imageFile));data=result;connection();
+    const image=result.image;
+    if(!image){throw new Error('画像の処理状態を確認してください。履歴を更新してから再試行してください。');}
+    $('#ocr-result').innerHTML=`<p class="note">${esc(result.message)}</p><label>読取結果（要確認）<textarea readonly rows="8">${esc(image.text||'デモでは文字読取を実行しません。GAS版で利用できます。')}</textarea></label><button class="button primary" id="use-card">内容を確認して入力する</button>`;
+    $('#use-card').onclick=()=>openEditor(Object.assign({source:'名刺画像',imageId:image.id,consent:'未確認'},image.suggestions||{}));
+    tell(result.message);
+  });
+});
+document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;page=0;customerRows();}});
+document.addEventListener('change',async e=>{
+  if(e.target.id==='status-filter'){filter=e.target.value;page=0;customerRows();}
+  if(e.target.id==='csv-input'){csvFile=e.target.files[0];if(csvFile&&csvFile.size>2*1024*1024){csvFile=null;tell('CSVは2MBまでです。',true);return;}await csvPreview();}
+  if(e.target.id==='encoding')await csvPreview();
+  if(['image-input','photo-input'].includes(e.target.id)) {
+    const f=e.target.files[0];if(!f)return;
+    if(!['image/jpeg','image/png'].includes(f.type)||f.size>5*1024*1024){tell('5MB以下のJPEG・PNGを選んでください。',true);return;}
+    imageFile=f;if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);
+    const img=document.createElement('img');img.src=imageUrl;img.alt='選択した名刺';img.className='image-preview';$('#image-preview').replaceChildren(img);$('#read-image').disabled=false;$('#ocr-result').replaceChildren();
+  }
+});
+$('#customer-form').addEventListener('submit',e=>{
+  e.preventDefault();act(async()=>{
+    const form=e.target,input=Object.fromEntries(new FormData(form));input.source=form.elements.source.value;input.stopped=form.elements.stopped.checked;
+    if(input.consentAt)input.consentAt=new Date(input.consentAt).toISOString();
+    try {data=await api('saveCustomer',input);$('#editor').close();tell(data.message);connection();render();}
+    catch(err){$('#form-error').textContent=err.message;$('#form-error').hidden=false;$('#form-error').scrollIntoView({block:'nearest'});}
+  });
+});
+refresh().catch(e=>{$('#main').innerHTML='<div class="panel empty"><h2>読み込めませんでした</h2><p>'+esc(e.message)+'</p><button class="button" data-refresh>再読込</button></div>';tell(e.message,true);});
+</script>
+</body></html>
