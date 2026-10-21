@@ -1,0 +1,16 @@
+.clasp.json
+.clasprc.json
+.env*
+!.env.example
+node_modules/
+private-data/
+*.csv
+*.jpg
+*.jpeg
+*.png
+*.heic
+*.pdf
+coverage/
+test-results/
+*.zip
+!.gitkeep
