@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_top"><title>顧客データ管理 | 総研</title><style>/* APP_CSS */</style></head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#customers"><span class="brand-mark">S</span><span>総研<span class="brand-sub">CUSTOMER WORKSPACE</span></span></a>
+    <div class="workspace-label">顧客データ管理 <span>Ph1</span></div>
+    <nav aria-label="メインメニュー">
+      <button data-view="customers" class="nav active"><span>▦</span>顧客一覧</button>
+      <button data-view="import" class="nav"><span>↥</span>Sansan CSV取込</button>
+      <button data-view="image" class="nav"><span>▣</span>名刺から登録</button>
+      <button data-view="reviews" class="nav"><span>◈</span>重複確認 <b id="review-count">0</b></button>
+      <button data-view="history" class="nav"><span>◷</span>取込・変更履歴</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="connection-dot"></div><span id="side-connection">接続を確認中</span><p>取得経路・受信希望・停止を<br>分けて管理します。</p></div>
+  </aside>
+  <div class="main-wrap">
+    <header class="topbar"><span>総研マーケティング工場 <span class="slash">/</span> 顧客管理</span><div><a id="sheet-link" target="_blank" rel="noopener" hidden>スプレッドシートを開く ↗</a><span class="avatar">S</span></div></header>
+    <div id="mode-banner" class="mode-banner">読み込んでいます…</div>
+    <main id="main"><div class="loading">顧客データを読み込んでいます…</div></main>
+    <footer>顧客データ管理 · 初期版 <span>メール送信機能は含みません</span></footer>
+  </div>
+</div>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<dialog id="editor" aria-labelledby="editor-title"><form id="customer-form">
+  <header class="dialog-head"><div><span class="eyebrow">CUSTOMER PROFILE</span><h2 id="editor-title">顧客を登録</h2></div><button type="button" class="icon-button" data-close aria-label="閉じる">×</button></header>
+  <div class="dialog-body">
+    <p id="editor-hint" class="note"></p><input name="id" type="hidden"><input name="version" type="hidden"><input name="imageId" type="hidden">
+    <div class="form-grid">
+      <label>氏名<input name="name" autocomplete="name" maxlength="1000" placeholder="山田 太郎"></label><label>会社名<input name="company" autocomplete="organization" maxlength="1000" placeholder="株式会社〇〇"></label>
+      <label>部署<input name="department" maxlength="1000"></label><label>役職<input name="title" maxlength="1000"></label>
+      <label class="wide">メールアドレス<input name="email" type="email" maxlength="1000" autocomplete="email" placeholder="name@example.com"></label>
+      <label>電話番号<input name="phone" type="tel" maxlength="1000"></label><label>氏名カナ<input name="kana" maxlength="1000"></label>
+      <label>第2メール<input name="email2" type="email" maxlength="1000"></label><label>取得経路<select name="source"><option>手入力</option><option>名刺画像</option><option>Sansan</option><option>Web</option><option>その他</option></select></label>
+    </div>
+    <details><summary>Sansan識別情報</summary><div class="form-grid"><label>人物ID<input name="personId"></label><label>名刺ID<input name="cardId"></label><label>会社ID<input name="companyId"></label></div></details>
+    <div class="section-divider"></div><h3>受信希望と配信停止</h3><p class="help">顧客登録や名刺交換だけでは、購読同意にしません。</p>
+    <div class="form-grid"><label>購読同意<select name="consent"><option>未確認</option><option>確認手続中</option><option>同意済み</option><option>拒否</option></select></label><label>同意日時<input name="consentAt" type="datetime-local"></label><label>同意の確認方法<input name="consentMethod" placeholder="本人からの返信など" maxlength="1000"></label><label>同意の証拠・記録場所<input name="consentEvidence" placeholder="受付番号や保管先" maxlength="1000"></label></div>
+    <label class="stop-box"><input name="stopped" type="checkbox"><span><strong>配信を停止する</strong><small>停止は再取込・顧客編集でも維持されます。この初期版では解除できません。</small></span></label>
+    <label>停止理由<input name="stopReason" maxlength="1000"></label><label>メモ<textarea name="memo" rows="3" maxlength="5000"></textarea></label>
+    <div id="form-error" class="inline-error" role="alert" hidden></div>
+  </div>
+  <div class="dialog-foot"><button type="button" class="button" data-close>キャンセル</button><button type="submit" class="button primary" id="save-button">保存する</button></div>
+</form></dialog>
+<script>/* APP_CORE */</script><script>/* APP_CLIENT */</script>
+</body></html>
