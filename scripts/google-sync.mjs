@@ -86,4 +86,3 @@ if(command==='check'){
     console.log(JSON.stringify({stage:'private-deployment',version:saved.version,url:saved.url,access:saved.access,executeAs:saved.executeAs}));
   }
 }
-ｚざｄ
