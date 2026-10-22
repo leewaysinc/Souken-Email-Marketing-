@@ -76,3 +76,34 @@ test('a stop entered for a duplicate applies immediately, before identity review
   const next=C.save(s,{name:'別表記',email:'a@example.com',stopped:true},ctx()).state;
   assert.equal(next.reviews.length,1);assert.equal(C.status(next,next.customers[0]).stopped,true);
 });
+
+test('all 60 Sansan columns remain independently editable without changing raw import values',()=>{
+  const values=C.CSV_FIELDS.map((f,i)=>f.key==='email'?'all@example.com':f.key==='email2'?'second@example.com':f.key==='givenKana'?'':'架空'+i);
+  let s=C.importCsv(C.empty(),csv([values]),{hash:'all-fields'},ctx()).state;
+  assert.equal(C.CSV_FIELDS.length,60);assert.equal(new Set(C.CSV_FIELDS.map(f=>f.key)).size,60);
+  assert.deepEqual(C.csvValues(s.customers[0]),values);
+  const edits=Object.fromEntries(C.CSV_FIELDS.map(f=>[f.key,f.key==='email'?'edited@example.com':f.key==='email2'?'second-edited@example.com':f.key+'編集']));
+  s=C.save(s,{...s.customers[0],...edits},ctx()).state;
+  assert.deepEqual(C.csvValues(s.customers[0]),C.CSV_FIELDS.map(f=>edits[f.key]));
+  assert.deepEqual(s.raw[0].values,values);assert.deepEqual(C.csvValues(s.events.at(-1).data.before),values);
+});
+
+test('family and given names preserve boundaries, original full text and missing kana',()=>{
+  const values=row({'氏名':'原本の全体 表記','氏名［姓］':'架 空','氏名［名］':'太郎','氏名（カナ）［姓］':'カクウ','氏名（カナ）［名］':'','会社名':'架空社'});
+  const c=C.csvPlan(csv([values]),C.empty()).items[0].incoming;
+  assert.equal(c.name,'原本の全体 表記');assert.equal(c.familyName,'架 空');assert.equal(c.givenName,'太郎');assert.equal(c.givenKana,'');
+  assert.equal(C.matches({familyName:'AB',givenName:'C',company:'架空社'},[{id:'1',familyName:'A',givenName:'BC',company:'架空社'}]).length,0);
+  assert.equal(C.matches({familyName:'架 空',givenName:'太郎',company:'架空社'},[{id:'1',familyName:'架空',givenName:'太郎',company:'架空社'}]).length,1);
+});
+
+test('legacy records hydrate missing fields from their exact raw row, without splitting full names or overwriting edits',()=>{
+  const s=C.empty(),values=row({'氏名［姓］':'架空','氏名［名］':'次郎','住所(2)［ビル名］':'第二ビル'});
+  s.raw.push({batchId:'batch',record:2,values});
+  s.customers.push({id:'1',version:1,source:'Sansan',name:'元の全体 表記',company:'修正済み',batchId:'batch',record:2});
+  s.customers.push({id:'2',name:'空白あり 氏名'});
+  C.hydrate(s);
+  assert.equal(s.customers[0].familyName,'架空');assert.equal(s.customers[0].building2,'第二ビル');assert.equal(s.customers[0].company,'修正済み');
+  assert.equal(s.customers[1].familyName,undefined);assert.equal(s.customers[1].givenName,undefined);
+  const saved=C.save(s,{id:'1',version:1,department:'追加部署'},ctx());
+  assert.equal(saved.state.customers[0].building2,'第二ビル');assert.equal(saved.state.customers[0].familyName,'架空');
+});
