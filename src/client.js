@@ -6,13 +6,18 @@ const operationIds = new Map();
 const uuid = () => crypto.randomUUID();
 const date = x => x ? new Date(x).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
 const customerName = CustomerCore.displayName;
-function buildCustomerFields() {
-  const basic=['familyName','givenName','familyKana','givenKana','company','department','title','email','email2','phone','mobile1'];
+function buildCustomerFields(c={}) {
   const labels={familyName:'姓',givenName:'名',familyKana:'姓（カナ）',givenKana:'名（カナ）',name:'氏名（元の全体表記）',kana:'氏名カナ（元の全体表記）'};
   const field=f=>'<label>'+esc(labels[f.key]||f.label)+(CustomerCore.longField(f.key)?'<textarea name="'+f.key+'" rows="3" maxlength="5000"></textarea>':'<input name="'+f.key+'" type="'+(['email','email2'].includes(f.key)?'email':'text')+'" maxlength="1000">')+'</label>';
-  const byKey=key=>CustomerCore.CSV_FIELDS.find(f=>f.key===key);
-  const groups=[...new Set(CustomerCore.CSV_FIELDS.filter(f=>!basic.includes(f.key)).map(f=>f.group))];
-  $('#sansan-fields').innerHTML='<div class="form-grid">'+basic.map(k=>field(byKey(k))).join('')+'</div>'+groups.map(group=>'<details><summary>'+esc(group)+'</summary><div class="form-grid">'+CustomerCore.CSV_FIELDS.filter(f=>f.group===group&&!basic.includes(f.key)).map(field).join('')+'</div></details>').join('');
+  const shown=CustomerCore.PRIMARY_FIELDS.map(key=>CustomerCore.CSV_FIELDS.find(f=>f.key===key)).concat(CustomerCore.CSV_FIELDS.filter(f=>!CustomerCore.PRIMARY_FIELDS.includes(f.key)&&CustomerCore.fieldVisible(f.key,c)));
+  const optional=CustomerCore.CSV_FIELDS.filter(f=>!CustomerCore.fieldVisible(f.key,c));
+  $('#sansan-fields').innerHTML='<div class="form-grid">'+shown.map(field).join('')+'</div>'+(optional.length?'<details><summary>未入力の追加項目を表示（'+optional.length+'項目）</summary><p class="help">必要になった項目はここから入力できます。入力済みの項目は次回から常に表示します。</p><div class="form-grid">'+optional.map(field).join('')+'</div></details>':'');
+}
+function consentDateView() {
+  const form=$('#customer-form'),card=form.elements.consent.value==='名刺交換のみ',input=form.elements.consentAt;
+  input.type=card?'text':'datetime-local';input.readOnly=card;
+  $('#consent-date-hint').textContent=card?'名刺交換日をそのまま使用します。空欄の場合は補いません。':'受信希望を確認した日時を記録します。';
+  if(card)input.value=form.elements.cardExchangedAt.value || '';
 }
 function tell(message,error=false) { const n=$('#notice');n.textContent=message;n.className=error?'error':'';n.hidden=false;clearTimeout(tell.timer);tell.timer=setTimeout(()=>n.hidden=true,error?15000:6500); }
 async function api(method,payload) {
@@ -79,12 +84,15 @@ function render() {
   }
 }
 function openEditor(c={}) {
-  const form=$('#customer-form');form.reset();$('#form-error').hidden=true;
+  const form=$('#customer-form');buildCustomerFields(c);form.reset();$('#form-error').hidden=true;
   Array.from(form.elements).forEach(el=>{if(el.name && el.type!=='checkbox')el.value=c[el.name] || '';});
-  form.elements.source.value=c.source || '手入力';form.elements.consent.value=c.consent || '未確認';form.elements.source.disabled=Boolean(c.id);
+  form.elements.source.value=c.source || '手入力';form.elements.consent.value=c.consent || '名刺交換のみ';form.elements.source.disabled=Boolean(c.id);
   form.elements.version.value=c.version || '';
-  const stopped=c.id?status(c).stopped:Boolean(c.stopped);form.elements.stopped.checked=stopped;form.elements.stopped.disabled=stopped;
-  if(c.consentAt){const d=new Date(c.consentAt);if(!isNaN(d))form.elements.consentAt.value=new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+  const stopped=c.id?status(c).stopped:Boolean(c.stopped);form.elements.stopped.checked=stopped;form.elements.stopped.disabled=true;
+  consentDateView();
+  if(c.consentAt&&form.elements.consent.value!=='名刺交換のみ'){const d=new Date(c.consentAt);if(!isNaN(d))form.elements.consentAt.value=new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+  const optOutAt=c.id?status(c).optOutAt:(c.optOutAt || '');
+  $('#opt-out-at').value=optOutAt?new Date(optOutAt).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',hour12:false})+'（日本時間）':'未記録';
   $('#editor-title').textContent=c.id?'顧客情報を編集':'顧客を登録';
   $('#editor-hint').textContent=(c.id?'顧客IDは維持されます。メール変更時は、同意を未確認へ戻します。':c.imageId?'名刺画像の読取候補です。姓・名・会社・メールを確認して保存してください。':'姓・名・会社名・メールのいずれかを入力してください。保存時に重複を確認します。')+(c.name&&!c.familyName&&!c.givenName?' この登録は姓名が未分離です。元の全体表記を確認し、姓・名を入力してください。':'');
   $('#editor').showModal();
@@ -131,12 +139,13 @@ document.addEventListener('click',e=>{
     const image=result.image;
     if(!image){throw new Error('画像の処理状態を確認してください。履歴を更新してから再試行してください。');}
     $('#ocr-result').innerHTML=`<p class="note">${esc(result.message)}</p><label>読取結果（要確認）<textarea readonly rows="8">${esc(image.text||'デモでは文字読取を実行しません。GAS版で利用できます。')}</textarea></label><button class="button primary" id="use-card">内容を確認して入力する</button>`;
-    $('#use-card').onclick=()=>openEditor(Object.assign({source:'名刺画像',imageId:image.id,consent:'未確認'},image.suggestions||{}));
+    $('#use-card').onclick=()=>openEditor(Object.assign({source:'名刺画像',imageId:image.id,consent:'名刺交換のみ'},image.suggestions||{}));
     tell(result.message);
   });
 });
-document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;page=0;customerRows();}});
+document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;page=0;customerRows();}if(e.target.name==='cardExchangedAt')consentDateView();});
 document.addEventListener('change',async e=>{
+  if(e.target.name==='consent')consentDateView();
   if(e.target.id==='status-filter'){filter=e.target.value;page=0;customerRows();}
   if(e.target.id==='csv-input'){csvFile=e.target.files[0];if(csvFile&&csvFile.size>2*1024*1024){csvFile=null;tell('CSVは2MBまでです。',true);return;}await csvPreview();}
   if(e.target.id==='encoding')await csvPreview();
@@ -151,7 +160,7 @@ buildCustomerFields();
 $('#customer-form').addEventListener('submit',e=>{
   e.preventDefault();act(async()=>{
     const form=e.target,input=Object.fromEntries(new FormData(form));input.source=form.elements.source.value;input.stopped=form.elements.stopped.checked;
-    if(input.consentAt)input.consentAt=new Date(input.consentAt).toISOString();
+    if(input.consentAt&&input.consent!=='名刺交換のみ')input.consentAt=new Date(input.consentAt).toISOString();
     try {data=await api('saveCustomer',input);$('#editor').close();tell(data.message);connection();render();}
     catch(err){$('#form-error').textContent=err.message;$('#form-error').hidden=false;$('#form-error').scrollIntoView({block:'nearest'});}
   });
