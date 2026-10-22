@@ -68,7 +68,17 @@ if(command==='check'){
     if(!version)version=await write('/versions','POST',{description:release});
     const deployments=await get('/deployments');
     let deployment=deployments.deployments?.find(d=>d.deploymentConfig?.description===release);
-    if(!deployment)deployment=await write('/deployments','POST',{versionNumber:version.versionNumber,manifestFileName:'appsscript',description:release});
+    if(!deployment){
+      let previous;
+      try{previous=JSON.parse(await fs.readFile(path.join(privateDir,'google-private-deployment.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+      if(previous){
+        const current=deployments.deployments?.find(d=>d.deploymentId===previous.deploymentId);
+        const currentEntry=current?.entryPoints?.find(e=>e.entryPointType==='WEB_APP');
+        if(!currentEntry || currentEntry.webApp.entryPointConfig.access!=='MYSELF' || currentEntry.webApp.entryPointConfig.executeAs!=='USER_ACCESSING' || current.deploymentConfig.description!==previous.release)throw new Error('Existing deployment changed or is not private. Review before updating.');
+        await fs.writeFile(path.join(privateDir,'google-deployment-before-update-'+Date.now()+'.json'),JSON.stringify(current,null,2));
+        deployment=await write('/deployments/'+encodeURIComponent(previous.deploymentId),'PUT',{deploymentConfig:{scriptId:config.scriptId,versionNumber:version.versionNumber,manifestFileName:'appsscript',description:release}});
+      }else deployment=await write('/deployments','POST',{versionNumber:version.versionNumber,manifestFileName:'appsscript',description:release});
+    }
     const entry=deployment.entryPoints?.find(e=>e.entryPointType==='WEB_APP');
     if(!entry||entry.webApp.entryPointConfig.access!=='MYSELF'||entry.webApp.entryPointConfig.executeAs!=='USER_ACCESSING')throw new Error('Returned deployment does not match private access settings.');
     const saved={deployedAt:new Date().toISOString(),version:version.versionNumber,deploymentId:deployment.deploymentId,url:entry.webApp.url,access:'MYSELF',executeAs:'USER_ACCESSING',release};
@@ -76,3 +86,4 @@ if(command==='check'){
     console.log(JSON.stringify({stage:'private-deployment',version:saved.version,url:saved.url,access:saved.access,executeAs:saved.executeAs}));
   }
 }
+ｚざｄ
