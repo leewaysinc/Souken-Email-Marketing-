@@ -43,3 +43,15 @@ test('generated HTML keeps shared and client code together in a valid module beh
   const result=spawnSync(process.execPath,['--check','--input-type=module'],{input:scripts[1][2],encoding:'utf8'});
   assert.equal(result.status,0,result.stderr);
 });
+
+test('editor renders every Sansan field exactly once, with separate name controls',()=>{
+  const client=fs.readFileSync(new URL('src/client.js',root),'utf8');
+  const core=fs.readFileSync(new URL('src/core.js',root),'utf8');
+  const target={innerHTML:''};
+  const context=vm.createContext({document:{querySelector:()=>target},crypto:{},module:{exports:{}}});
+  vm.runInContext(core+'\n'+client.slice(0,client.indexOf('function tell('))+'\nbuildCustomerFields();',context);
+  const names=Array.from(target.innerHTML.matchAll(/name="([^"]+)"/g),m=>m[1]);
+  assert.equal(names.length,60);assert.equal(new Set(names).size,60);
+  assert.deepEqual([...names].sort(),Array.from(context.CustomerCore.CSV_FIELDS,f=>f.key).sort());
+  assert.match(target.innerHTML,/>姓<input name="familyName"/);assert.match(target.innerHTML,/>名<input name="givenName"/);
+});
