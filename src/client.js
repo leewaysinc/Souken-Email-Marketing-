@@ -16,8 +16,8 @@ function buildCustomerFields(c={}) {
 function consentDateView() {
   const form=$('#customer-form'),card=form.elements.consent.value==='名刺交換のみ',input=form.elements.consentAt;
   input.type=card?'text':'datetime-local';input.readOnly=card;
-  $('#consent-date-hint').textContent=card?'名刺交換日をそのまま使用します。空欄の場合は補いません。':'受信希望を確認した日時を記録します。';
-  if(card)input.value=form.elements.cardExchangedAt.value || '';
+  $('#consent-date-hint').textContent=card?'名刺交換日を優先し、空欄なら登録日を使います。両方とも空欄なら未記録です。':'受信希望を確認した日時を記録します。';
+  if(card)input.value=CustomerCore.cardConsent({consent:'名刺交換のみ',cardExchangedAt:form.elements.cardExchangedAt.value,sansanRegisteredAt:form.elements.sansanRegisteredAt.value}).consentAt;
 }
 function tell(message,error=false) { const n=$('#notice');n.textContent=message;n.className=error?'error':'';n.hidden=false;clearTimeout(tell.timer);tell.timer=setTimeout(()=>n.hidden=true,error?15000:6500); }
 async function api(method,payload) {
@@ -143,7 +143,7 @@ document.addEventListener('click',e=>{
     tell(result.message);
   });
 });
-document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;page=0;customerRows();}if(e.target.name==='cardExchangedAt')consentDateView();});
+document.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;page=0;customerRows();}if(['cardExchangedAt','sansanRegisteredAt'].includes(e.target.name))consentDateView();});
 document.addEventListener('change',async e=>{
   if(e.target.name==='consent')consentDateView();
   if(e.target.id==='status-filter'){filter=e.target.value;page=0;customerRows();}
