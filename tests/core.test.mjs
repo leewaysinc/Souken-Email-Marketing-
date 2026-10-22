@@ -116,14 +116,17 @@ test('filled and likely fields remain prominent while empty auxiliary fields sta
   assert.equal(C.fieldVisible('fax2',c),false);
 });
 
-test('business-card-only is the new default and takes the exact exchange date, never registration date or today',()=>{
+test('business-card-only defaults to exchange date, falls back to registration date and never invents today',()=>{
   const values=row({'氏名［姓］':'架空','氏名［名］':'四郎','名刺交換日':'2026/10/05','登録日':'2026/10/20'});
   const imported=C.importCsv(C.empty(),csv([values]),{hash:'card-default'},ctx()).state.customers[0];
   assert.equal(imported.consent,'名刺交換のみ');assert.equal(imported.consentAt,'2026/10/05');
   assert.equal(C.status({ ...C.empty(),customers:[imported]},imported).reasons.includes('受信希望の確認待ち'),true);
   const created=C.save(C.empty(),{familyName:'架空',cardExchangedAt:'2026/09/30',sansanRegisteredAt:'2026/10/20',consentAt:'1900-01-01'},ctx()).state.customers[0];
   assert.equal(created.consentAt,'2026/09/30');
-  const missing=C.save(C.empty(),{familyName:'架空',sansanRegisteredAt:'2026/10/20'},ctx()).state.customers[0];assert.equal(missing.consentAt,'');
+  const fallback=C.save(C.empty(),{familyName:'架空',cardExchangedAt:'  ',sansanRegisteredAt:'2026/10/20'},ctx()).state.customers[0];assert.equal(fallback.consentAt,'2026/10/20');assert.equal(fallback.consentDateSource,'Sansan登録日');
+  const missing=C.save(C.empty(),{familyName:'架空'},ctx()).state.customers[0];assert.equal(missing.consentAt,'');assert.equal(missing.consentDateSource,'');
+  const csvFallback=C.csvPlan(csv([row({'氏名［姓］':'架空','登録日':'2026/09/01'})]),C.empty()).items[0].incoming;assert.equal(csvFallback.consentAt,'2026/09/01');assert.equal(csvFallback.consentDateSource,'Sansan登録日');
+  assert.equal(imported.consentDateSource,'Sansan名刺交換日');
   const existing=C.save(C.empty(),{familyName:'旧顧客',consent:'未確認'},ctx()).state;
   const kept=C.save(existing,{...existing.customers[0],memo:'変更'},ctx()).state.customers[0];assert.equal(kept.consent,'未確認');
 });
