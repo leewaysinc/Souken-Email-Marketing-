@@ -27,6 +27,10 @@ function showMyAccount() {
 function getAppData() {
   return locked_(function(db,actor) { return response_(readState_(db),actor,db); });
 }
+function initializeApp() {
+  setupApp();
+  return getAppData();
+}
 function saveCustomer(input) {
   return mutate_('顧客保存',input,function(s,ctx){return CustomerCore.save(s,input,ctx);});
 }
