@@ -8,6 +8,7 @@ function setupApp() {
       const name = TABLE_NAMES_[key];
       if (!db.getSheetByName(name)) {
         const sh = db.insertSheet(name);
+        fitColumns_(sh,COLUMNS_[key].length);
         sh.getRange(1,1,1,COLUMNS_[key].length).setValues([COLUMNS_[key].map(x=>x[1])]);
         sh.setFrozenRows(1); sh.getRange(1,1,1,COLUMNS_[key].length).setBackground('#143c37').setFontColor('#ffffff');
       }
@@ -76,7 +77,7 @@ function readBusinessCard(input) {
 
 var TABLE_NAMES_ = {customers:'顧客一覧',reviews:'重複確認',imports:'取込履歴',raw:'CSV原行',events:'変更履歴',images:'名刺画像',stops:'停止台帳'};
 var COLUMNS_ = {
-  customers:[['id','顧客ID'],['name','氏名'],['company','会社名'],['department','部署'],['title','役職'],['email','メール'],['email2','第2メール'],['phone','電話'],['source','取得経路'],['consent','購読同意'],['stopped','配信停止'],['updatedAt','更新日時'],['$json','管理用記録JSON']],
+  customers:null,
   reviews:[['id','候補ID'],['status','状態'],['source','取得経路'],['at','受付日時'],['reason','判断理由'],['customerId','関連顧客ID'],['$json','管理用記録JSON']],
   imports:[['id','取込ID'],['name','ファイル名'],['at','取込日時'],['count','内容あり'],['blank','空行'],['created','新規'],['pending','確認待ち'],['fileId','原本Drive ID'],['$json','管理用記録JSON']],
   raw:[['id','原行ID'],['batchId','取込ID'],['record','CSVレコード番号'],['$json','原値JSON']],
@@ -85,6 +86,8 @@ var COLUMNS_ = {
   stops:[['id','停止ID'],['customerId','顧客ID'],['email','対象メール'],['at','受付日時'],['reason','理由'],['actor','操作者'],['$json','管理用記録JSON']]
 };
 function config_() {
+  // Initialize after all GAS files have loaded; file execution order is not a dependency.
+  if(!COLUMNS_.customers)COLUMNS_.customers=[['id','顧客ID']].concat(CustomerCore.CSV_FIELDS.map(f=>[f.key,f.label]),[['source','取得経路'],['consent','購読同意'],['consentAt','同意日時'],['consentMethod','同意の確認方法'],['consentEvidence','同意の証拠・記録場所'],['stopped','配信停止'],['stopReason','停止理由'],['updatedAt','更新日時'],['version','版番号'],['$json','管理用記録JSON']]);
   const p = PropertiesService.getScriptProperties();
   const spreadsheetId = p.getProperty('SPREADSHEET_ID'), folderId = p.getProperty('ARCHIVE_FOLDER_ID');
   const allowed = (p.getProperty('ALLOWED_USERS') || '').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
@@ -130,20 +133,27 @@ function readState_(db) {
   CustomerCore.TABLES.forEach(key=>{
     const sh = db.getSheetByName(TABLE_NAMES_[key]);
     if (!sh) throw new Error('管理シートが不足しています。setupAppを実行してください。');
-    if (sh.getLastRow()>1) s[key]=sh.getRange(2,COLUMNS_[key].length,sh.getLastRow()-1,1).getValues().filter(r=>r[0]).map(r=>JSON.parse(r[0]));
+    const headers=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+    const jsonColumn=headers.indexOf(COLUMNS_[key].find(c=>c[0]==='$json')[1])+1;
+    if(!jsonColumn)throw new Error('管理用記録の列が見つかりません。シートの見出しを確認してください：'+TABLE_NAMES_[key]);
+    if (sh.getLastRow()>1) s[key]=sh.getRange(2,jsonColumn,sh.getLastRow()-1,1).getValues().filter(r=>r[0]).map(r=>JSON.parse(r[0]));
   });
-  return s;
+  return CustomerCore.hydrate(s);
 }
+function fitColumns_(sh,count) { if(sh.getMaxColumns()<count)sh.insertColumnsAfter(sh.getMaxColumns(),count-sh.getMaxColumns()); }
 function cell_(v) {
   if (v === true) return '停止中'; if (v === false) return '';
   const text = String(v == null ? '' : v);
   return /^[=+\-@'\t\r\n]/.test(text) ? "'"+text : text;
 }
 function project_(db,state) {
+  CustomerCore.hydrate(state);
   CustomerCore.TABLES.forEach(key=>{
     const sh = db.getSheetByName(TABLE_NAMES_[key]), cols=COLUMNS_[key];
     const rows=state[key].map(record=>cols.map(col=>col[0]==='$json'?JSON.stringify(record):cell_(record[col[0]])));
     if (rows.some(r=>r.some(v=>String(v).length>45000))) throw new Error('1セルの保存上限を超えます。管理者に連絡してください。');
+    fitColumns_(sh,cols.length);
+    sh.getRange(1,1,1,cols.length).setValues([cols.map(c=>c[1])]);
     if (sh.getMaxRows()<rows.length+1) sh.insertRowsAfter(sh.getMaxRows(),rows.length+1-sh.getMaxRows());
     if (rows.length) sh.getRange(2,1,rows.length,cols.length).setNumberFormat('@').setValues(rows);
     if (sh.getLastRow()>rows.length+1) sh.getRange(rows.length+2,1,sh.getLastRow()-rows.length-1,cols.length).clearContent();
