@@ -7,6 +7,16 @@ var CustomerCore = (function () {
   const CSV_FIELDS = HEADERS.map((label,i)=>({key:FIELD_KEYS[i],label,group:i<5?'会社情報':i<11?'氏名の元表記':i<24?'住所・連絡先1':i<36?'住所・連絡先2':'Sansan管理情報'}));
   const TEXT_FIELDS = FIELD_KEYS.concat(['consentAt','consentMethod','consentEvidence','stopReason']);
   const longField = k => ['memo','autoMemo','address1','address2','tags'].includes(k);
+  const PRIMARY_FIELDS = ['familyName','givenName','familyKana','givenKana','company','department','title','email','email2','phone','mobile1','postal1','address1','url1','cardExchangedAt','sansanRegisteredAt','tags','memo','ownerName','ownerDepartment'];
+  const CONSENTS = ['名刺交換のみ','未確認','確認手続中','同意済み','拒否'];
+  function fieldVisible(key,c={}) { return PRIMARY_FIELDS.includes(key) || String(c[key] == null ? '' : c[key]).trim()!==''; }
+  function cardConsent(c) {
+    if(c.consent==='名刺交換のみ') {
+      c.consentAt=String(c.cardExchangedAt || '');
+      c.consentDateSource=c.consentAt?'Sansan名刺交換日':'';
+    } else c.consentDateSource='';
+    return c;
+  }
   const copy = x => JSON.parse(JSON.stringify(x));
   const norm = s => String(s || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
   const mail = s => String(s || '').trim().toLowerCase(); // Used for conservative matching, never rewrites delivery addresses.
@@ -58,7 +68,7 @@ var CustomerCore = (function () {
       if (values.every(v => !v.trim())) { blank++; return; }
       if (values.length !== headers.length) throw new Error('CSVレコード ' + (i+2) + ' の列数が異なります。');
       if (JSON.stringify(values).length > 40000) throw new Error('1行が大きすぎます。レコード ' + (i+2));
-      const incoming = Object.assign(Object.fromEntries(CSV_FIELDS.map((f,i)=>[f.key,values[i]])),{source:'Sansan',consent:'未確認',stopped:false});
+      const incoming = cardConsent(Object.assign(Object.fromEntries(CSV_FIELDS.map((f,i)=>[f.key,values[i]])),{source:'Sansan',consent:'名刺交換のみ',stopped:false}));
       items.push({record:i+2,values,incoming});
     });
     if (!items.length) throw new Error('登録できる内容のある行がありません。');
@@ -86,7 +96,7 @@ var CustomerCore = (function () {
     if (![c.familyName,c.givenName,c.name,c.company,c.email].some(v => String(v || '').trim())) throw new Error('姓・名・会社名・メールのいずれかを入力してください。');
     TEXT_FIELDS.forEach(k => { if (String(c[k] || '').length > (longField(k) ? 5000 : 1000)) throw new Error('入力が長すぎます：'+k); });
     if (!emailValid(c.email) || !emailValid(c.email2)) throw new Error('メールの形式を確認してください。');
-    if (!['未確認','確認手続中','同意済み','拒否'].includes(c.consent)) throw new Error('同意状態が不正です。');
+    if (!CONSENTS.includes(c.consent)) throw new Error('同意状態が不正です。');
     if (!['Sansan','手入力','名刺画像','Web','その他'].includes(c.source)) throw new Error('取得経路が不正です。');
     if (c.consent === '同意済み' && (!c.email || !c.consentAt || !c.consentMethod || !c.consentEvidence || !Number.isFinite(Date.parse(c.consentAt)))) throw new Error('同意済みには、メール・有効な同意日時・確認方法・証拠の記録が必要です。');
   }
@@ -95,7 +105,7 @@ var CustomerCore = (function () {
     if (!s.stops.some(x => x.customerId === c.id && x.email === mail(c.email))) s.stops.push({id:ctx.id('STOP'),customerId:c.id,email:mail(c.email),at:ctx.now,reason:reason || '画面で停止',actor:ctx.actor});
     c.stopped = true; c.stopAt = c.stopAt || ctx.now;
   }
-  function make(c,ctx) { return Object.assign({id:ctx.id('C'),version:1,createdAt:ctx.now,updatedAt:ctx.now,consent:'未確認',stopped:false,source:'手入力'},c); }
+  function make(c,ctx) { return Object.assign({id:ctx.id('C'),version:1,createdAt:ctx.now,updatedAt:ctx.now,consent:'名刺交換のみ',stopped:false,optOutAt:'',source:'手入力'},c); }
   function save(state,input,ctx) {
     const s = copy(state), old = s.customers.find(c => c.id === input.id);
     if (input.id && !old) throw new Error('顧客が見つかりません。一覧を更新してください。');
@@ -103,13 +113,14 @@ var CustomerCore = (function () {
     const c = old ? copy(old) : make({},ctx);
     TEXT_FIELDS.forEach(k => { if(Object.prototype.hasOwnProperty.call(input,k))c[k] = String(input[k] == null ? '' : input[k]);else if(!old)c[k]=''; });
     c.source = old ? old.source : (input.source || '手入力');
-    c.consent = input.consent || '未確認';
+    c.consent = input.consent || (old && old.consent) || '名刺交換のみ';
     c.stopped = Boolean(old && old.stopped) || input.stopped === true;
     if (old && old.stopped && input.stopped !== true) throw new Error('この初期版では停止を解除できません。');
     if (old && mail(old.email) !== mail(c.email)) {
       c.consent = '未確認'; c.consentAt = ''; c.consentMethod = ''; c.consentEvidence = '';
     }
     if (c.consent === '拒否') c.stopped = true;
+    cardConsent(c);
     if (input.imageId) {
       if (!s.images.some(x => x.id === input.imageId)) throw new Error('名刺画像の保存記録が見つかりません。');
       c.imageId = input.imageId;
@@ -171,6 +182,24 @@ var CustomerCore = (function () {
     event(s,ctx,'重複判断',{reviewId:r.id,customerId:target.id,mode:input.mode,reason:r.reason,incoming:r.incoming});
     return {state:s,message:'判断を保存しました。元データと既存の同意・停止は保持しています。'};
   }
+  // Internal domain operation for a future verified recipient-confirmation endpoint.
+  // A link visit or an unchecked confirmation must never call this as a confirmed receipt.
+  function confirmOptOut(state,input,ctx) {
+    if(input.confirmed!==true || !String(input.receiptId || '').trim() || String(input.receiptId).length>100)throw new Error('受信者の確認完了記録が必要です。');
+    const s=copy(state),c=s.customers.find(x=>x.id===input.customerId),email=mail(input.email);
+    if(!c || !email || ![c.email,c.email2].map(mail).includes(email))throw new Error('停止対象の宛先を確認してください。');
+    const previous=s.events.find(e=>e.type==='受信者オプトアウト確定' && e.data.receiptId===input.receiptId);
+    if(previous){
+      if(previous.data.customerId!==c.id || previous.data.email!==email)throw new Error('確認完了記録が一致しません。');
+      return {state:s,message:'オプトアウトは受付済みです。'};
+    }
+    const before=copy(c);
+    c.stopped=true;c.stopAt=c.stopAt || ctx.now;c.optOutAt=c.optOutAt || ctx.now;c.stopReason='受信者が停止確認画面で同意';
+    c.version++;c.updatedAt=ctx.now;
+    s.stops.push({id:ctx.id('STOP'),customerId:c.id,email,at:ctx.now,optOutAt:ctx.now,reason:c.stopReason,actor:'受信者',origin:'受信者確認',receiptId:input.receiptId});
+    event(s,ctx,'受信者オプトアウト確定',{customerId:c.id,email,receiptId:input.receiptId,before,after:copy(c)});
+    return {state:s,message:'配信停止を受け付けました。'};
+  }
   function status(s,c) {
     const emails = [c.email,c.email2].map(mail).filter(Boolean);
     const stopped = c.stopped || s.stops.some(x=>x.customerId===c.id || (x.email && emails.includes(x.email)));
@@ -181,11 +210,12 @@ var CustomerCore = (function () {
     if (!c.email || !emailValid(c.email)) reasons.push('宛先の確認待ち');
     if (c.email2) reasons.push('配信用宛先の選択待ち');
     if (c.consent !== '同意済み' || !c.consentAt || !c.consentMethod || !c.consentEvidence) reasons.push('受信希望の確認待ち');
-    return {stopped,duplicate,reasons,label:stopped?'配信停止':reasons.length?'確認待ち':'同意記録あり'};
+    const dates=s.stops.filter(x=>x.optOutAt&&(x.customerId===c.id || (x.email&&emails.includes(x.email)))).map(x=>x.optOutAt).concat(c.optOutAt?[c.optOutAt]:[]).sort();
+    return {stopped,duplicate,reasons,optOutAt:dates[0] || '',label:stopped?'配信停止':reasons.length?'確認待ち':'同意記録あり'};
   }
   function suggest(text) {
     return {email:(String(text).match(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i)||[''])[0],phone:(String(text).match(/(?:\+81[\s-]?)?0?\d{1,4}[-ー\s]\d{1,4}[-ー\s]\d{3,4}/)||[''])[0]};
   }
-  return {HEADERS,CSV_FIELDS,TEXT_FIELDS,TABLES,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy,displayName,displayKana,csvValues,hydrate,longField};
+  return {HEADERS,CSV_FIELDS,TEXT_FIELDS,TABLES,PRIMARY_FIELDS,CONSENTS,fieldVisible,cardConsent,confirmOptOut,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy,displayName,displayKana,csvValues,hydrate,longField};
 })();
 if (typeof module !== 'undefined') module.exports = CustomerCore;
