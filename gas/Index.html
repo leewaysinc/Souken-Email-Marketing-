@@ -330,6 +330,7 @@ document.addEventListener('click',e=>{
   if(b.dataset.edit)openEditor(data.customers.find(c=>c.id===b.dataset.edit));
   if(b.hasAttribute('data-close'))$('#editor').close();
   if(b.hasAttribute('data-refresh'))act(refresh);
+  if(b.hasAttribute('data-initialize'))act(async()=>{data=await api('initializeApp');connection();render();tell('管理用のシートを作成しました。');});
   if(b.id==='prev-page'||b.id==='next-page'){page+=b.id==='next-page'?1:-1;customerRows();}
   if(b.id==='commit-import')act(async()=>{
     if(!$('#confirm-import').checked)throw new Error('内容と原本の保存を確認し、チェックしてください。');
@@ -370,6 +371,10 @@ $('#customer-form').addEventListener('submit',e=>{
     catch(err){$('#form-error').textContent=err.message;$('#form-error').hidden=false;$('#form-error').scrollIntoView({block:'nearest'});}
   });
 });
-refresh().catch(e=>{$('#main').innerHTML='<div class="panel empty"><h2>読み込めませんでした</h2><p>'+esc(e.message)+'</p><button class="button" data-refresh>再読込</button></div>';tell(e.message,true);});
+refresh().catch(e=>{
+  const needsSetup=/setupApp/.test(e.message);
+  $('#main').innerHTML='<div class="panel empty"><h2>'+(needsSetup?'最初の設定を行います':'読み込めませんでした')+'</h2><p>'+esc(needsSetup?'接続先のスプレッドシートに、顧客一覧と履歴用の管理シートを作成します。既存のシートは削除しません。':e.message)+'</p><button class="button '+(needsSetup?'primary':'')+'" '+(needsSetup?'data-initialize':'data-refresh')+'>'+(needsSetup?'管理シートを作成して始める':'再読込')+'</button></div>';
+  if(!needsSetup)tell(e.message,true);
+});
 </script>
 </body></html>
