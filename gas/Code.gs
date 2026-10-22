@@ -35,6 +35,11 @@ function initializeApp() {
 function saveCustomer(input) {
   return mutate_('顧客保存',input,function(s,ctx){return CustomerCore.save(s,input,ctx);});
 }
+// Private server operation. A future recipient endpoint must verify its signed link
+// and explicit confirmation before creating this receipt. Never expose this via google.script.run.
+function recordConfirmedOptOut_(input) {
+  return mutate_('受信者オプトアウト',input,function(s,ctx){return CustomerCore.confirmOptOut(s,input,ctx);});
+}
 function resolveDuplicate(input) {
   return mutate_('重複判断',input,function(s,ctx){return CustomerCore.resolve(s,input,ctx);});
 }
@@ -83,11 +88,11 @@ var COLUMNS_ = {
   raw:[['id','原行ID'],['batchId','取込ID'],['record','CSVレコード番号'],['$json','原値JSON']],
   events:[['id','記録ID'],['at','日時'],['actor','操作者'],['type','操作'],['$json','変更前後JSON']],
   images:[['id','画像ID'],['at','日時'],['name','ファイル名'],['fileId','原本Drive ID'],['ocrStatus','文字読取状態'],['$json','管理用記録JSON']],
-  stops:[['id','停止ID'],['customerId','顧客ID'],['email','対象メール'],['at','受付日時'],['reason','理由'],['actor','操作者'],['$json','管理用記録JSON']]
+  stops:[['id','停止ID'],['customerId','顧客ID'],['email','対象メール'],['at','受付日時'],['optOutAt','オプトアウト日時'],['origin','受付経路'],['receiptId','受信者確認記録ID'],['reason','理由'],['actor','操作者'],['$json','管理用記録JSON']]
 };
 function config_() {
   // Initialize after all GAS files have loaded; file execution order is not a dependency.
-  if(!COLUMNS_.customers)COLUMNS_.customers=[['id','顧客ID']].concat(CustomerCore.CSV_FIELDS.map(f=>[f.key,f.label]),[['source','取得経路'],['consent','購読同意'],['consentAt','同意日時'],['consentMethod','同意の確認方法'],['consentEvidence','同意の証拠・記録場所'],['stopped','配信停止'],['stopReason','停止理由'],['updatedAt','更新日時'],['version','版番号'],['$json','管理用記録JSON']]);
+  if(!COLUMNS_.customers)COLUMNS_.customers=[['id','顧客ID']].concat(CustomerCore.CSV_FIELDS.map(f=>[f.key,f.label]),[['source','取得経路'],['consent','購読同意'],['consentAt','同意日・日時'],['consentDateSource','同意日の参照項目'],['consentMethod','同意の確認方法'],['consentEvidence','同意の証拠・記録場所'],['stopped','配信停止'],['stopAt','配信停止記録日時'],['optOutAt','オプトアウト日時'],['stopReason','停止理由'],['updatedAt','更新日時'],['version','版番号'],['$json','管理用記録JSON']]);
   const p = PropertiesService.getScriptProperties();
   const spreadsheetId = p.getProperty('SPREADSHEET_ID'), folderId = p.getProperty('ARCHIVE_FOLDER_ID');
   const allowed = (p.getProperty('ALLOWED_USERS') || '').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
