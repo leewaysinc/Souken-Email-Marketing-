@@ -22,7 +22,7 @@ test('strict 60-column schema and blank records',()=>{
 test('CSV import preserves all original values and does not grant consent',()=>{
   const values=row({'氏名':'架空','Email(1)':'a@example.com','メモ':'a,b\nnext','氏名（カナ）［名］':''});
   const s=C.importCsv(C.empty(),csv([values]),{hash:'1',name:'fiction.csv'},ctx()).state;
-  assert.deepEqual(s.raw[0].values,values);assert.equal(s.customers[0].consent,'未確認');
+  assert.deepEqual(s.raw[0].values,values);assert.equal(s.customers[0].consent,'名刺交換のみ');
   assert.throws(()=>C.importCsv(s,csv([values]),{hash:'1'},ctx()),/取込済み/);
 });
 test('both duplicate rows in the same CSV are held for human judgment',()=>{
@@ -106,4 +106,34 @@ test('legacy records hydrate missing fields from their exact raw row, without sp
   assert.equal(s.customers[1].familyName,undefined);assert.equal(s.customers[1].givenName,undefined);
   const saved=C.save(s,{id:'1',version:1,department:'追加部署'},ctx());
   assert.equal(saved.state.customers[0].building2,'第二ビル');assert.equal(saved.state.customers[0].familyName,'架空');
+});
+
+
+test('filled and likely fields remain prominent while empty auxiliary fields stay optional',()=>{
+  const c={vp:'使用中',building2:'第二ビル',givenKana:''};
+  assert.equal(C.fieldVisible('vp',c),true);assert.equal(C.fieldVisible('building2',c),true);
+  assert.equal(C.fieldVisible('givenKana',c),true);assert.equal(C.fieldVisible('cardExchangedAt',c),true);
+  assert.equal(C.fieldVisible('fax2',c),false);
+});
+
+test('business-card-only is the new default and takes the exact exchange date, never registration date or today',()=>{
+  const values=row({'氏名［姓］':'架空','氏名［名］':'四郎','名刺交換日':'2026/10/05','登録日':'2026/10/20'});
+  const imported=C.importCsv(C.empty(),csv([values]),{hash:'card-default'},ctx()).state.customers[0];
+  assert.equal(imported.consent,'名刺交換のみ');assert.equal(imported.consentAt,'2026/10/05');
+  assert.equal(C.status({ ...C.empty(),customers:[imported]},imported).reasons.includes('受信希望の確認待ち'),true);
+  const created=C.save(C.empty(),{familyName:'架空',cardExchangedAt:'2026/09/30',sansanRegisteredAt:'2026/10/20',consentAt:'1900-01-01'},ctx()).state.customers[0];
+  assert.equal(created.consentAt,'2026/09/30');
+  const missing=C.save(C.empty(),{familyName:'架空',sansanRegisteredAt:'2026/10/20'},ctx()).state.customers[0];assert.equal(missing.consentAt,'');
+  const existing=C.save(C.empty(),{familyName:'旧顧客',consent:'未確認'},ctx()).state;
+  const kept=C.save(existing,{...existing.customers[0],memo:'変更'},ctx()).state.customers[0];assert.equal(kept.consent,'未確認');
+});
+
+test('opt-out requires explicit confirmed receipt, stores server time and survives edits/retries',()=>{
+  const s=C.save(C.empty(),{...agreed,optOutAt:'1900-01-01'},ctx()).state,c=s.customers[0];assert.equal(c.optOutAt,'');
+  const receipt={customerId:c.id,email:c.email,receiptId:'verified-fiction-1',confirmed:true,optOutAt:'1900-01-01'};
+  assert.throws(()=>C.confirmOptOut(s,{...receipt,confirmed:false},ctx()),/確認完了/);assert.equal(s.stops.length,0);
+  const stopped=C.confirmOptOut(s,receipt,ctx()).state;assert.equal(stopped.customers[0].optOutAt,ctx().now);assert.equal(stopped.stops[0].receiptId,receipt.receiptId);
+  const again=C.confirmOptOut(stopped,receipt,{...ctx(),now:'2026-11-01T00:00:00Z'}).state;assert.equal(again.stops.length,1);assert.equal(again.customers[0].optOutAt,ctx().now);
+  const edited=C.save(again,{...again.customers[0],memo:'確認後編集',optOutAt:'1900-01-01'},ctx()).state;assert.equal(edited.customers[0].optOutAt,ctx().now);assert.equal(C.status(edited,edited.customers[0]).stopped,true);
+  assert.throws(()=>C.confirmOptOut(s,{...receipt,email:'other@example.com'},ctx()),/宛先/);
 });
