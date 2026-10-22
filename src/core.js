@@ -3,11 +3,26 @@ var CustomerCore = (function () {
   'use strict';
   const HEADERS = '会社名,会社名（英名）,会社名（カナ）,部署名,役職,氏名,氏名［姓］,氏名［名］,氏名（カナ）,氏名（カナ）［姓］,氏名（カナ）［名］,国,郵便番号(1),住所(1)［全て］,住所(1)［都道府県］,住所(1)［市区町村］,住所(1)［番地］,住所(1)［ビル名］,TEL-1(1),TEL-2(1),FAX(1),携帯電話(1),Email(1),URL(1),郵便番号(2),住所(2)［全て］,住所(2)［都道府県］,住所(2)［市区町村］,住所(2)［番地］,住所(2)［ビル名］,TEL-1(2),TEL-2(2),FAX(2),携帯電話(2),Email(2),URL(2),重要度区分,VP,CP,ファイル出力済み,タグ,登録日,名刺交換日,人事異動発令日,不達フラグ(住所),不達フラグ(TEL),不達フラグ(FAX),不達フラグ(メール),メモ,自動追記メモ,名刺所有者ユーザID,名刺所有者名,名刺所有者所属部署名,人物ID,名刺ID,会社ID,データ化状況,法人番号,SOC (Sansan Organization Code),（空欄）'.split(',');
   const TABLES = ['customers', 'reviews', 'imports', 'raw', 'events', 'images', 'stops'];
-  const TEXT_FIELDS = ['name','company','department','title','email','email2','phone','kana','memo','personId','cardId','companyId','consentAt','consentMethod','consentEvidence','stopReason'];
+  const FIELD_KEYS = 'company,companyEn,companyKana,department,title,name,familyName,givenName,kana,familyKana,givenKana,country,postal1,address1,prefecture1,city1,street1,building1,phone,phone2_1,fax1,mobile1,email,url1,postal2,address2,prefecture2,city2,street2,building2,phone1_2,phone2_2,fax2,mobile2,email2,url2,importance,vp,cp,fileExported,tags,sansanRegisteredAt,cardExchangedAt,personnelChangeAt,bounceAddress,bouncePhone,bounceFax,bounceEmail,memo,autoMemo,ownerUserId,ownerName,ownerDepartment,personId,cardId,companyId,dataStatus,corporateNumber,soc,reservedColumn'.split(',');
+  const CSV_FIELDS = HEADERS.map((label,i)=>({key:FIELD_KEYS[i],label,group:i<5?'会社情報':i<11?'氏名の元表記':i<24?'住所・連絡先1':i<36?'住所・連絡先2':'Sansan管理情報'}));
+  const TEXT_FIELDS = FIELD_KEYS.concat(['consentAt','consentMethod','consentEvidence','stopReason']);
+  const longField = k => ['memo','autoMemo','address1','address2','tags'].includes(k);
   const copy = x => JSON.parse(JSON.stringify(x));
   const norm = s => String(s || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
   const mail = s => String(s || '').trim().toLowerCase(); // Used for conservative matching, never rewrites delivery addresses.
   const emailValid = s => !s || /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(s);
+  const structuredName = c => Boolean(c.familyName || c.givenName);
+  function displayName(c) { return structuredName(c) ? [c.familyName,c.givenName].filter(Boolean).join(' ') : (c.name || ''); }
+  function displayKana(c) { return c.familyKana || c.givenKana ? [c.familyKana,c.givenKana].filter(Boolean).join(' ') : (c.kana || ''); }
+  function csvValues(c) { return CSV_FIELDS.map(f=>String(c[f.key] == null ? '' : c[f.key])); }
+  function hydrate(state) {
+    const records=state.customers.concat(state.reviews.map(r=>r.incoming));
+    records.forEach(c=>{
+      const raw=state.raw.find(r=>r.batchId===c.batchId && r.record===c.record && c.batchId);
+      if(raw)CSV_FIELDS.forEach((f,i)=>{if(c[f.key]===undefined)c[f.key]=String(raw.values[i] == null ? '' : raw.values[i]);});
+    });
+    return state;
+  }
   function empty() { return Object.fromEntries(TABLES.map(k => [k, []])); }
   function parseCsv(input) {
     const text = String(input).replace(/^\uFEFF/, '');
@@ -43,14 +58,7 @@ var CustomerCore = (function () {
       if (values.every(v => !v.trim())) { blank++; return; }
       if (values.length !== headers.length) throw new Error('CSVレコード ' + (i+2) + ' の列数が異なります。');
       if (JSON.stringify(values).length > 40000) throw new Error('1行が大きすぎます。レコード ' + (i+2));
-      const get = key => values[headers.indexOf(key)] || '';
-      const incoming = {
-        name:get('氏名') || [get('氏名［姓］'),get('氏名［名］')].filter(Boolean).join(' '),
-        company:get('会社名'),department:get('部署名'),title:get('役職'),kana:get('氏名（カナ）'),
-        email:get('Email(1)').trim(),email2:get('Email(2)').trim(),phone:get('TEL-1(1)') || get('携帯電話(1)'),
-        personId:get('人物ID'),cardId:get('名刺ID'),companyId:get('会社ID'),memo:get('メモ'),
-        source:'Sansan',consent:'未確認',stopped:false
-      };
+      const incoming = Object.assign(Object.fromEntries(CSV_FIELDS.map((f,i)=>[f.key,values[i]])),{source:'Sansan',consent:'未確認',stopped:false});
       items.push({record:i+2,values,incoming});
     });
     if (!items.length) throw new Error('登録できる内容のある行がありません。');
@@ -66,13 +74,17 @@ var CustomerCore = (function () {
       if (c.cardId && c.cardId === x.cardId && c.source === x.source) why.push('名刺IDが一致');
       const emails = [x.email,x.email2].map(mail).filter(Boolean);
       if ([c.email,c.email2].map(mail).filter(Boolean).some(e => emails.includes(e))) why.push('メールが一致');
-      if (c.name && c.company && norm(c.name) === norm(x.name) && norm(c.company) === norm(x.company)) why.push('氏名と会社が一致');
-      return why.length ? [{id:x.id,name:x.name,company:x.company,email:x.email,reasons:why}] : [];
+      if (c.company && x.company && norm(c.company) === norm(x.company)) {
+        if (structuredName(c) && structuredName(x)) {
+          if (norm(c.familyName)===norm(x.familyName) && norm(c.givenName)===norm(x.givenName)) why.push('姓・名と会社が一致');
+        } else if(displayName(c) && norm(displayName(c))===norm(displayName(x))) why.push('氏名の全体表記と会社が一致（姓名未分離を含む）');
+      }
+      return why.length ? [{id:x.id,name:displayName(x),familyName:x.familyName,givenName:x.givenName,company:x.company,email:x.email,reasons:why}] : [];
     });
   }
   function validate(c) {
-    if (![c.name,c.company,c.email].some(v => String(v || '').trim())) throw new Error('氏名・会社名・メールのいずれかを入力してください。');
-    TEXT_FIELDS.forEach(k => { if (String(c[k] || '').length > (k === 'memo' ? 5000 : 1000)) throw new Error('入力が長すぎます：'+k); });
+    if (![c.familyName,c.givenName,c.name,c.company,c.email].some(v => String(v || '').trim())) throw new Error('姓・名・会社名・メールのいずれかを入力してください。');
+    TEXT_FIELDS.forEach(k => { if (String(c[k] || '').length > (longField(k) ? 5000 : 1000)) throw new Error('入力が長すぎます：'+k); });
     if (!emailValid(c.email) || !emailValid(c.email2)) throw new Error('メールの形式を確認してください。');
     if (!['未確認','確認手続中','同意済み','拒否'].includes(c.consent)) throw new Error('同意状態が不正です。');
     if (!['Sansan','手入力','名刺画像','Web','その他'].includes(c.source)) throw new Error('取得経路が不正です。');
@@ -89,7 +101,7 @@ var CustomerCore = (function () {
     if (input.id && !old) throw new Error('顧客が見つかりません。一覧を更新してください。');
     if (old && old.version !== Number(input.version)) throw new Error('別の操作で更新されています。一覧を更新してやり直してください。');
     const c = old ? copy(old) : make({},ctx);
-    TEXT_FIELDS.forEach(k => { c[k] = String(input[k] || '').trim(); });
+    TEXT_FIELDS.forEach(k => { if(Object.prototype.hasOwnProperty.call(input,k))c[k] = String(input[k] == null ? '' : input[k]);else if(!old)c[k]=''; });
     c.source = old ? old.source : (input.source || '手入力');
     c.consent = input.consent || '未確認';
     c.stopped = Boolean(old && old.stopped) || input.stopped === true;
@@ -174,6 +186,6 @@ var CustomerCore = (function () {
   function suggest(text) {
     return {email:(String(text).match(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i)||[''])[0],phone:(String(text).match(/(?:\+81[\s-]?)?0?\d{1,4}[-ー\s]\d{1,4}[-ー\s]\d{3,4}/)||[''])[0]};
   }
-  return {HEADERS,TABLES,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy};
+  return {HEADERS,CSV_FIELDS,TEXT_FIELDS,TABLES,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy,displayName,displayKana,csvValues,hydrate,longField};
 })();
 if (typeof module !== 'undefined') module.exports = CustomerCore;
