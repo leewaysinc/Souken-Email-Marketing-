@@ -12,8 +12,9 @@ var CustomerCore = (function () {
   function fieldVisible(key,c={}) { return PRIMARY_FIELDS.includes(key) || String(c[key] == null ? '' : c[key]).trim()!==''; }
   function cardConsent(c) {
     if(c.consent==='名刺交換のみ') {
-      c.consentAt=String(c.cardExchangedAt || '');
-      c.consentDateSource=c.consentAt?'Sansan名刺交換日':'';
+      const exchanged=String(c.cardExchangedAt || ''),registered=String(c.sansanRegisteredAt || '');
+      c.consentAt=exchanged.trim()?exchanged:registered.trim()?registered:'';
+      c.consentDateSource=exchanged.trim()?'Sansan名刺交換日':registered.trim()?'Sansan登録日':'';
     } else c.consentDateSource='';
     return c;
   }
