@@ -48,7 +48,7 @@ test('GAS stores/reloads customers, audit and readable sheet columns',()=>{
 });
 test('GAS authorization fails closed on every externally callable data operation',()=>{
   const h=harness();h.setActor('');
-  for(const fn of ['getAppData','saveCustomer','resolveDuplicate','importSansan','readBusinessCard','doGet'])assert.throws(()=>h.context[fn]({operationId:op()}),/利用できません/);
+  for(const fn of ['getAppData','initializeApp','saveCustomer','resolveDuplicate','importSansan','readBusinessCard','doGet'])assert.throws(()=>h.context[fn]({operationId:op()}),/利用できません/);
   h.setActor('outsider@example.com');assert.throws(()=>h.context.getAppData(),/利用できません/);
 });
 test('GAS rejects repeated operation without duplicate records',()=>{
@@ -84,4 +84,8 @@ test('GAS escapes spreadsheet formulas in display cells',()=>{
   const h=harness();h.context.saveCustomer({operationId:op(),name:'=IMPORTXML("x")'});
   assert.equal(h.sheets.get('顧客一覧').getRange(2,2).getValues()[0][0],"'=IMPORTXML(\"x\")");
   assert.equal(h.context.getAppData().customers[0].name,'=IMPORTXML("x")');
+});
+test('GAS first-run initialization is safe to repeat and preserves existing customers',()=>{
+  const h=harness();h.context.saveCustomer({operationId:op(),name:'初期化後も残す架空顧客'});
+  const result=h.context.initializeApp();assert.equal(result.customers.length,1);assert.equal(result.customers[0].name,'初期化後も残す架空顧客');
 });
