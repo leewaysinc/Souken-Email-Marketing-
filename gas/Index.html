@@ -44,7 +44,36 @@
   </div>
   <div class="dialog-foot"><button type="button" class="button" data-close>キャンセル</button><button type="submit" class="button primary" id="save-button">保存する</button></div>
 </form></dialog>
-<script>/* Shared by GAS and the local preview. No network or Google dependencies. */
+<script>/* Keep this guard independent of the application bundle so startup errors remain visible. */
+(function () {
+  var complete = false;
+  function failure(message) {
+    if (complete) return;
+    clearTimeout(timer);
+    var main = document.getElementById('main');
+    var box = document.createElement('div'); box.className = 'panel empty';
+    var title = document.createElement('h2'); title.textContent = '読み込めませんでした';
+    var detail = document.createElement('p'); detail.textContent = message;
+    var button = document.createElement('button'); button.className = 'button'; button.textContent = '画面を再読み込み';
+    button.onclick = function () { window.location.reload(); };
+    box.appendChild(title); box.appendChild(detail); box.appendChild(button); main.replaceChildren(box);
+    document.getElementById('mode-banner').textContent = '読込を完了できませんでした';
+    document.getElementById('side-connection').textContent = '接続未確認';
+  }
+  window.appBoot = {
+    ready: function () { complete = true; clearTimeout(timer); },
+    fail: failure
+  };
+  window.addEventListener('error', function (event) {
+    failure('画面の起動処理でエラーが発生しました。詳細：' + event.message + '（' + event.filename.split('/').pop().split('?')[0] + '、行 ' + event.lineno + '、列 ' + event.colno + '）');
+  });
+  var timer = setTimeout(function () {
+    failure('読込に時間がかかっています。画面を再読み込みしてください。解消しない場合は、この表示を担当者にお知らせください。');
+  }, 45000);
+}());
+
+//# sourceURL=customer-boot.js
+</script><script type="module">/* Shared by GAS and the local preview. No network or Google dependencies. */
 var CustomerCore = (function () {
   'use strict';
   const HEADERS = '会社名,会社名（英名）,会社名（カナ）,部署名,役職,氏名,氏名［姓］,氏名［名］,氏名（カナ）,氏名（カナ）［姓］,氏名（カナ）［名］,国,郵便番号(1),住所(1)［全て］,住所(1)［都道府県］,住所(1)［市区町村］,住所(1)［番地］,住所(1)［ビル名］,TEL-1(1),TEL-2(1),FAX(1),携帯電話(1),Email(1),URL(1),郵便番号(2),住所(2)［全て］,住所(2)［都道府県］,住所(2)［市区町村］,住所(2)［番地］,住所(2)［ビル名］,TEL-1(2),TEL-2(2),FAX(2),携帯電話(2),Email(2),URL(2),重要度区分,VP,CP,ファイル出力済み,タグ,登録日,名刺交換日,人事異動発令日,不達フラグ(住所),不達フラグ(TEL),不達フラグ(FAX),不達フラグ(メール),メモ,自動追記メモ,名刺所有者ユーザID,名刺所有者名,名刺所有者所属部署名,人物ID,名刺ID,会社ID,データ化状況,法人番号,SOC (Sansan Organization Code),（空欄）'.split(',');
@@ -223,7 +252,10 @@ var CustomerCore = (function () {
   return {HEADERS,TABLES,empty,parseCsv,csvPlan,matches,validate,save,importCsv,resolve,status,suggest,mail,copy};
 })();
 if (typeof module !== 'undefined') module.exports = CustomerCore;
-</script><script>'use strict';
+
+//# sourceURL=customer-core.js
+
+'use strict';
 const $ = (q,root=document) => root.querySelector(q);
 const esc = x => String(x == null ? '' : x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let data = CustomerCore.empty(), view = 'customers', query = '', filter = 'all', page = 0, csvFile = null, imageFile = null, imageUrl = '', busy = false;
@@ -253,7 +285,7 @@ function connection() {
   if(data.spreadsheetUrl && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(data.spreadsheetUrl))link.href=data.spreadsheetUrl;
   $('#review-count').textContent=data.reviews.filter(x=>x.status==='確認待ち').length;
 }
-async function refresh() { data=await api('getAppData');connection();render(); }
+async function refresh() { data=await api('getAppData');connection();render();window.appBoot.ready(); }
 function heading(title,description,actions='') { return `<div class="page-heading"><div><div class="eyebrow">CUSTOMER WORKSPACE</div><h1>${title}</h1><p class="subtext">${description}</p></div><div class="heading-actions">${actions}</div></div>`; }
 function pill(label,tone='') {return `<span class="pill ${tone}">${esc(label)}</span>`;}
 function status(c) {return CustomerCore.status(data,c);}
@@ -372,9 +404,12 @@ $('#customer-form').addEventListener('submit',e=>{
   });
 });
 refresh().catch(e=>{
+  window.appBoot.ready();
   const needsSetup=/setupApp/.test(e.message);
   $('#main').innerHTML='<div class="panel empty"><h2>'+(needsSetup?'最初の設定を行います':'読み込めませんでした')+'</h2><p>'+esc(needsSetup?'接続先のスプレッドシートに、顧客一覧と履歴用の管理シートを作成します。既存のシートは削除しません。':e.message)+'</p><button class="button '+(needsSetup?'primary':'')+'" '+(needsSetup?'data-initialize':'data-refresh')+'>'+(needsSetup?'管理シートを作成して始める':'再読込')+'</button></div>';
   if(!needsSetup)tell(e.message,true);
 });
+
+//# sourceURL=customer-client.js
 </script>
 </body></html>
