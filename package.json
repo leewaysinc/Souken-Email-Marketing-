@@ -3,6 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "description": "Sansan CSV・名刺画像・手入力に対応するGAS顧客管理アプリ",
-  "scripts": {"build": "node scripts/build.mjs", "test": "node --test tests/*.test.mjs", "preview": "node scripts/preview.mjs"},
+  "scripts": {"build": "node scripts/build.mjs", "test": "node --test tests/*.test.mjs", "preview": "node scripts/preview.mjs", "google:check": "node scripts/google-sync.mjs check", "google:push": "node scripts/google-sync.mjs push --apply", "google:deploy-private": "node scripts/google-sync.mjs deploy-private"},
   "engines": {"node": ">=20"}
 }
