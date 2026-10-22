@@ -28,7 +28,7 @@ function connection() {
   if(data.spreadsheetUrl && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(data.spreadsheetUrl))link.href=data.spreadsheetUrl;
   $('#review-count').textContent=data.reviews.filter(x=>x.status==='確認待ち').length;
 }
-async function refresh() { data=await api('getAppData');connection();render(); }
+async function refresh() { data=await api('getAppData');connection();render();window.appBoot.ready(); }
 function heading(title,description,actions='') { return `<div class="page-heading"><div><div class="eyebrow">CUSTOMER WORKSPACE</div><h1>${title}</h1><p class="subtext">${description}</p></div><div class="heading-actions">${actions}</div></div>`; }
 function pill(label,tone='') {return `<span class="pill ${tone}">${esc(label)}</span>`;}
 function status(c) {return CustomerCore.status(data,c);}
@@ -147,6 +147,7 @@ $('#customer-form').addEventListener('submit',e=>{
   });
 });
 refresh().catch(e=>{
+  window.appBoot.ready();
   const needsSetup=/setupApp/.test(e.message);
   $('#main').innerHTML='<div class="panel empty"><h2>'+(needsSetup?'最初の設定を行います':'読み込めませんでした')+'</h2><p>'+esc(needsSetup?'接続先のスプレッドシートに、顧客一覧と履歴用の管理シートを作成します。既存のシートは削除しません。':e.message)+'</p><button class="button '+(needsSetup?'primary':'')+'" '+(needsSetup?'data-initialize':'data-refresh')+'>'+(needsSetup?'管理シートを作成して始める':'再読込')+'</button></div>';
   if(!needsSetup)tell(e.message,true);
