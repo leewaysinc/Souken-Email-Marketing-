@@ -27,12 +27,14 @@
   <header class="dialog-head"><div><span class="eyebrow">CUSTOMER PROFILE</span><h2 id="editor-title">顧客を登録</h2></div><button type="button" class="icon-button" data-close aria-label="閉じる">×</button></header>
   <div class="dialog-body">
     <p id="editor-hint" class="note"></p><input name="id" type="hidden"><input name="version" type="hidden"><input name="imageId" type="hidden">
-    <p class="help">姓・名とカナは別々に保存します。空白からの推測分割は行いません。Sansanの60項目は下の各欄で確認・編集できます。</p>
+    <p class="help">よく使う項目と入力済みの項目を表示しています。空欄の補助項目は「未入力の追加項目を表示」から入力できます。</p>
     <div id="sansan-fields"></div>
     <label>取得経路<select name="source"><option>手入力</option><option>名刺画像</option><option>Sansan</option><option>Web</option><option>その他</option></select></label>
     <div class="section-divider"></div><h3>受信希望と配信停止</h3><p class="help">顧客登録や名刺交換だけでは、購読同意にしません。</p>
-    <div class="form-grid"><label>購読同意<select name="consent"><option>未確認</option><option>確認手続中</option><option>同意済み</option><option>拒否</option></select></label><label>同意日時<input name="consentAt" type="datetime-local"></label><label>同意の確認方法<input name="consentMethod" placeholder="本人からの返信など" maxlength="1000"></label><label>同意の証拠・記録場所<input name="consentEvidence" placeholder="受付番号や保管先" maxlength="1000"></label></div>
-    <label class="stop-box"><input name="stopped" type="checkbox"><span><strong>配信を停止する</strong><small>停止は再取込・顧客編集でも維持されます。この初期版では解除できません。</small></span></label>
+    <div class="form-grid"><label>購読同意<select name="consent"><option>名刺交換のみ</option><option>未確認</option><option>確認手続中</option><option>同意済み</option><option>拒否</option></select></label><label>同意日・日時<input name="consentAt" type="text" readonly><small id="consent-date-hint" class="help"></small></label><label>同意の確認方法<input name="consentMethod" placeholder="本人からの返信など" maxlength="1000"></label><label>同意の証拠・記録場所<input name="consentEvidence" placeholder="受付番号や保管先" maxlength="1000"></label></div>
+    <p class="help">「名刺交換のみ」は購読の明示同意とは分けて記録します。既存の同意・停止は自動で変更しません。</p>
+    <label class="stop-box"><input name="stopped" type="checkbox" disabled><span><strong>配信停止の状態</strong><small>受信者が停止確認画面でオプトアウトに同意した際に反映する項目です。この画面では切り替えません。</small></span></label>
+    <label>オプトアウト日時<input id="opt-out-at" type="text" value="未記録" readonly><small class="help">受信者の確認完了日時です。停止リンクの公開連携は準備中です。</small></label>
     <label>停止理由<input name="stopReason" maxlength="1000"></label>
     <div id="form-error" class="inline-error" role="alert" hidden></div>
   </div>
