@@ -125,3 +125,14 @@ test('GAS full-field import and edit preserve all 60 columns, exact raw data and
   const raw=h.sheets.get('CSV原行').getRange(2,4).getValues()[0][0];
   assert.deepEqual(JSON.parse(raw).values,values);
 });
+
+
+test('GAS persists confirmed opt-out time and receipt while ordinary edits cannot forge it',()=>{
+  const h=harness();const created=h.context.saveCustomer({operationId:op(),familyName:'停止確認',email:'receipt@example.com'}),c=created.customers[0];
+  const stopped=h.context.recordConfirmedOptOut_({operationId:op(),customerId:c.id,email:c.email,receiptId:'fiction-receipt',confirmed:true,optOutAt:'1900-01-01'});
+  assert.ok(Date.parse(stopped.customers[0].optOutAt)>Date.parse('2026-01-01'));assert.equal(stopped.customers[0].stopped,true);
+  const sh=h.sheets.get('顧客一覧'),headers=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+  assert.equal(sh.getRange(2,headers.indexOf('オプトアウト日時')+1).getValues()[0][0],stopped.customers[0].optOutAt);
+  const edited=h.context.saveCustomer({...stopped.customers[0],operationId:op(),memo:'保持確認',optOutAt:'1900-01-01'});
+  assert.equal(edited.customers[0].optOutAt,stopped.customers[0].optOutAt);
+});
